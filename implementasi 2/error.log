@@ -1,0 +1,408 @@
+[2023-08-08 01:08:42 +0000] [6070] [INFO] Starting gunicorn 21.2.0
+[2023-08-08 01:08:42 +0000] [6070] [INFO] Listening at: unix:app.sock (6070)
+[2023-08-08 01:08:42 +0000] [6070] [INFO] Using worker: sync
+[2023-08-08 01:08:42 +0000] [6071] [INFO] Booting worker with pid: 6071
+[2023-08-08 01:16:32 +0000] [6070] [INFO] Handling signal: term
+[2023-08-08 01:16:32 +0000] [6071] [INFO] Worker exiting (pid: 6071)
+[2023-08-08 01:16:43 +0000] [6070] [INFO] Shutting down: Master
+[2023-08-08 01:16:45 +0000] [6220] [INFO] Starting gunicorn 21.2.0
+[2023-08-08 01:16:45 +0000] [6220] [INFO] Listening at: unix:app.sock (6220)
+[2023-08-08 01:16:45 +0000] [6220] [INFO] Using worker: sync
+[2023-08-08 01:16:45 +0000] [6221] [INFO] Booting worker with pid: 6221
+[2023-08-08 01:18:48 +0000] [6220] [INFO] Handling signal: term
+[2023-08-08 01:18:48 +0000] [6221] [INFO] Worker exiting (pid: 6221)
+[2023-08-08 01:18:54 +0000] [6220] [INFO] Shutting down: Master
+[2023-08-08 01:18:55 +0000] [6276] [INFO] Starting gunicorn 21.2.0
+[2023-08-08 01:18:55 +0000] [6276] [INFO] Listening at: unix:app.sock (6276)
+[2023-08-08 01:18:55 +0000] [6276] [INFO] Using worker: sync
+[2023-08-08 01:18:55 +0000] [6277] [INFO] Booting worker with pid: 6277
+[2023-08-08 01:40:58 +0000] [6276] [CRITICAL] WORKER TIMEOUT (pid:6277)
+[2023-08-08 01:40:59 +0000] [6276] [ERROR] Worker (pid:6277) was sent SIGKILL! Perhaps out of memory?
+[2023-08-08 01:40:59 +0000] [6641] [INFO] Booting worker with pid: 6641
+[2023-08-08 01:47:46 +0000] [6276] [CRITICAL] WORKER TIMEOUT (pid:6641)
+[2023-08-08 01:47:48 +0000] [6276] [ERROR] Worker (pid:6641) was sent SIGKILL! Perhaps out of memory?
+[2023-08-08 01:47:48 +0000] [6852] [INFO] Booting worker with pid: 6852
+[2023-08-08 02:15:56 +0000] [6276] [ERROR] Worker (pid:6852) was sent SIGKILL! Perhaps out of memory?
+[2023-08-08 02:15:56 +0000] [7834] [INFO] Booting worker with pid: 7834
+[2023-08-08 02:15:56 +0000] [6276] [INFO] Handling signal: term
+[2023-08-08 02:16:26 +0000] [6276] [INFO] Shutting down: Master
+[2023-08-08 02:27:03 +0000] [595] [INFO] Starting gunicorn 21.2.0
+[2023-08-08 02:27:03 +0000] [595] [INFO] Listening at: unix:app.sock (595)
+[2023-08-08 02:27:03 +0000] [595] [INFO] Using worker: sync
+[2023-08-08 02:27:03 +0000] [682] [INFO] Booting worker with pid: 682
+[2023-08-08 02:32:10,128] ERROR in app: Exception on /cek-sentimen-analysis [POST]
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3652, in get_loc
+    return self._engine.get_loc(casted_key)
+  File "pandas/_libs/index.pyx", line 147, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 176, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7080, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 0
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/arimuzakir/ihate/app.py", line 137, in cekSentimenAnalysis
+    tweet = prediksi(tweet, model, perluasan)
+  File "/home/arimuzakir/ihate/data/colab/prediksi.py", line 182, in prediksi
+    yPredProb[0][3] = 0
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/frame.py", line 3761, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3654, in get_loc
+    raise KeyError(key) from err
+KeyError: 0
+[2023-08-08 02:32:22,333] ERROR in app: Exception on /cek-sentimen-analysis [POST]
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3652, in get_loc
+    return self._engine.get_loc(casted_key)
+  File "pandas/_libs/index.pyx", line 147, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 176, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7080, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 0
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/arimuzakir/ihate/app.py", line 137, in cekSentimenAnalysis
+    tweet = prediksi(tweet, model, perluasan)
+  File "/home/arimuzakir/ihate/data/colab/prediksi.py", line 182, in prediksi
+    yPredProb[0][3] = 0
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/frame.py", line 3761, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3654, in get_loc
+    raise KeyError(key) from err
+KeyError: 0
+[2023-08-08 02:32:42,773] ERROR in app: Exception on /cek-sentimen-analysis [POST]
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3652, in get_loc
+    return self._engine.get_loc(casted_key)
+  File "pandas/_libs/index.pyx", line 147, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 176, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7080, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 0
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/arimuzakir/ihate/app.py", line 137, in cekSentimenAnalysis
+    tweet = prediksi(tweet, model, perluasan)
+  File "/home/arimuzakir/ihate/data/colab/prediksi.py", line 182, in prediksi
+    yPredProb[0][3] = 0
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/frame.py", line 3761, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3654, in get_loc
+    raise KeyError(key) from err
+KeyError: 0
+[2023-08-08 02:34:38,432] ERROR in app: Exception on /cek-sentimen-analysis [POST]
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3652, in get_loc
+    return self._engine.get_loc(casted_key)
+  File "pandas/_libs/index.pyx", line 147, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 176, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7080, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 0
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/arimuzakir/ihate/app.py", line 137, in cekSentimenAnalysis
+    tweet = prediksi(tweet, model, perluasan)
+  File "/home/arimuzakir/ihate/data/colab/prediksi.py", line 182, in prediksi
+    yPredProb[0][3] = 0
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/frame.py", line 3761, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3654, in get_loc
+    raise KeyError(key) from err
+KeyError: 0
+[2023-08-08 04:52:15,253] ERROR in app: Exception on /cek-sentimen-analysis [POST]
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3652, in get_loc
+    return self._engine.get_loc(casted_key)
+  File "pandas/_libs/index.pyx", line 147, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 176, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7080, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 0
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/arimuzakir/ihate/app.py", line 137, in cekSentimenAnalysis
+    tweet = prediksi(tweet, model, perluasan)
+  File "/home/arimuzakir/ihate/data/colab/prediksi.py", line 182, in prediksi
+    yPredProb[0][3] = 0
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/frame.py", line 3761, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3654, in get_loc
+    raise KeyError(key) from err
+KeyError: 0
+[2023-08-08 06:35:48 +0000] [595] [CRITICAL] WORKER TIMEOUT (pid:682)
+[2023-08-08 06:35:49 +0000] [595] [ERROR] Worker (pid:682) was sent SIGKILL! Perhaps out of memory?
+[2023-08-08 06:35:49 +0000] [6369] [INFO] Booting worker with pid: 6369
+[2023-08-08 08:26:00 +0000] [595] [INFO] Handling signal: term
+[2023-08-08 08:26:00 +0000] [595] [ERROR] Worker (pid:6369) was sent SIGKILL! Perhaps out of memory?
+[2023-08-08 08:26:00 +0000] [595] [INFO] Shutting down: Master
+[2023-08-08 23:08:17 +0000] [598] [INFO] Starting gunicorn 21.2.0
+[2023-08-08 23:08:17 +0000] [598] [INFO] Listening at: unix:app.sock (598)
+[2023-08-08 23:08:17 +0000] [598] [INFO] Using worker: sync
+[2023-08-08 23:08:17 +0000] [682] [INFO] Booting worker with pid: 682
+[2023-08-08 23:09:31,065] ERROR in app: Exception on /cek-sentimen-analysis [POST]
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3652, in get_loc
+    return self._engine.get_loc(casted_key)
+  File "pandas/_libs/index.pyx", line 147, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 176, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7080, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 0
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/arimuzakir/ihate/app.py", line 137, in cekSentimenAnalysis
+    tweet = prediksi(tweet, model, perluasan)
+  File "/home/arimuzakir/ihate/data/colab/prediksi.py", line 182, in prediksi
+    yPredProb[0][3] = 0
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/frame.py", line 3761, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3654, in get_loc
+    raise KeyError(key) from err
+KeyError: 0
+[2023-08-08 23:09:51,489] ERROR in app: Exception on /cek-sentimen-analysis [POST]
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3652, in get_loc
+    return self._engine.get_loc(casted_key)
+  File "pandas/_libs/index.pyx", line 147, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 176, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7080, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 0
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/arimuzakir/ihate/app.py", line 137, in cekSentimenAnalysis
+    tweet = prediksi(tweet, model, perluasan)
+  File "/home/arimuzakir/ihate/data/colab/prediksi.py", line 182, in prediksi
+    yPredProb[0][3] = 0
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/frame.py", line 3761, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3654, in get_loc
+    raise KeyError(key) from err
+KeyError: 0
+[2023-08-08 23:11:30,290] ERROR in app: Exception on /cek-sentimen-analysis [POST]
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3652, in get_loc
+    return self._engine.get_loc(casted_key)
+  File "pandas/_libs/index.pyx", line 147, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 176, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7080, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 0
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/arimuzakir/ihate/app.py", line 137, in cekSentimenAnalysis
+    tweet = prediksi(tweet, model, perluasan)
+  File "/home/arimuzakir/ihate/data/colab/prediksi.py", line 182, in prediksi
+    yPredProb[0][3] = 0
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/frame.py", line 3761, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3654, in get_loc
+    raise KeyError(key) from err
+KeyError: 0
+[2023-08-08 23:11:44,901] ERROR in app: Exception on /cek-sentimen-analysis [POST]
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3652, in get_loc
+    return self._engine.get_loc(casted_key)
+  File "pandas/_libs/index.pyx", line 147, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 176, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7080, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 0
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/arimuzakir/ihate/app.py", line 137, in cekSentimenAnalysis
+    tweet = prediksi(tweet, model, perluasan)
+  File "/home/arimuzakir/ihate/data/colab/prediksi.py", line 182, in prediksi
+    yPredProb[0][3] = 0
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/frame.py", line 3761, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3654, in get_loc
+    raise KeyError(key) from err
+KeyError: 0
+[2023-08-08 23:12:09,950] ERROR in app: Exception on /cek-sentimen-analysis [POST]
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3652, in get_loc
+    return self._engine.get_loc(casted_key)
+  File "pandas/_libs/index.pyx", line 147, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 176, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7080, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 0
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/arimuzakir/ihate/app.py", line 137, in cekSentimenAnalysis
+    tweet = prediksi(tweet, model, perluasan)
+  File "/home/arimuzakir/ihate/data/colab/prediksi.py", line 182, in prediksi
+    yPredProb[0][3] = 0
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/frame.py", line 3761, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3654, in get_loc
+    raise KeyError(key) from err
+KeyError: 0
+[2023-08-09 02:21:57,549] ERROR in app: Exception on /cek-sentimen-analysis [POST]
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3652, in get_loc
+    return self._engine.get_loc(casted_key)
+  File "pandas/_libs/index.pyx", line 147, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 176, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7080, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 0
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/arimuzakir/ihate/app.py", line 137, in cekSentimenAnalysis
+    tweet = prediksi(tweet, model, perluasan)
+  File "/home/arimuzakir/ihate/data/colab/prediksi.py", line 182, in prediksi
+    yPredProb[0][3] = 0
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/frame.py", line 3761, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3654, in get_loc
+    raise KeyError(key) from err
+KeyError: 0
+[2023-08-09 02:22:50,206] ERROR in app: Exception on /cek-sentimen-analysis [POST]
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3652, in get_loc
+    return self._engine.get_loc(casted_key)
+  File "pandas/_libs/index.pyx", line 147, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 176, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7080, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 0
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/flask/app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/arimuzakir/ihate/app.py", line 137, in cekSentimenAnalysis
+    tweet = prediksi(tweet, model, perluasan)
+  File "/home/arimuzakir/ihate/data/colab/prediksi.py", line 182, in prediksi
+    yPredProb[0][3] = 0
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/frame.py", line 3761, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "/home/arimuzakir/ihate/env/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 3654, in get_loc
+    raise KeyError(key) from err
+KeyError: 0
+[2023-08-09 09:18:48 +0000] [598] [INFO] Handling signal: term
+[2023-08-09 09:18:50 +0000] [598] [INFO] Shutting down: Master
+[2023-08-09 13:19:48 +0000] [593] [INFO] Starting gunicorn 21.2.0
+[2023-08-09 13:19:48 +0000] [593] [INFO] Listening at: unix:app.sock (593)
+[2023-08-09 13:19:48 +0000] [593] [INFO] Using worker: sync
+[2023-08-09 13:19:48 +0000] [680] [INFO] Booting worker with pid: 680

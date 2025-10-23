@@ -1,0 +1,155 @@
+{% with link=1, title=' Sistem Deteksi Ujaran Kebencian Twitter Batch' %}
+    {% include 'main/header.html' %}
+{% endwith %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <center><strong><h5><i class="fab fa-twitter"></i> Prediksi Data </h5></strong></center>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('cekBatch')}}" method="POST" enctype="multipart/form-data">
+                    {{ form.csrf_token }}
+                    <div class="row">
+                        <div class="col-sm-6 mb-3">
+                            <input class="form-control form-control-sm" type="file" name="batchSentimen" id="batchSentimen" accept=".csv" required>
+                            <div class="form-text text-muted" style="font-size: .75rem;" id="basic-addon4">*Hanya Support CSV (hanya 20 baris).</div>
+                        </div>
+                        <div class="col-sm-2 mb-3">
+                            <select name="model" id="model" class="form-select" aria-label="Default select example" style="border-radius: unset;" requried>
+                                <option value="">Pilih Model</option>
+                                <option value="CNN" {% if model == "CNN" %} selected {% endif %} >FuSE-CNN</option>
+                               <!-- <option value="BIGRU" {% if model == "BIGRU" %} selected {% endif %}>BIGRU</option>
+                                <option value="LSTM" {% if model == "LSTM" %} selected {% endif %}>LSTM</option>-->
+                            </select>
+                        </div>
+                        <div class="col-sm-2 mb-3">
+                            <select name="perluasan" id="perluasan" class="form-select" aria-label="Default select example" style="border-radius: unset;" requried>
+                                <option value="" readonly>--- Model Perluasan ---</option>
+                                <option value="0" {% if perluasan == "0" %} selected {% endif %} >Tidak</option>
+                                <option value="1" {% if perluasan == "1" %} selected {% endif %}>Iya</option>
+                            </select>
+                        </div>
+                        <!-- <div class="col-sm-2 mb-3">
+                            <input type="checkbox" class="form-check-input" name="perluasanKalimat" id="perluasanKalimat">
+                            <label class="form-check-label" for="myCheckbox">Perluasan Kalimat</label>
+                        </div> -->
+                        <div class="col-sm-2 mb-3">
+                            <button type="submit" id="prosesSentimen" class="btn btn-success btn-sm"><i class="fas fa-search"></i> Cek Kalimat Batch</button>
+                        </div>
+                    </div>
+
+                    {% if hasil=='1' %}
+                        <div class="row mt-3 justify-content-center">
+                            <div class="col-md-12 text-center">
+                                <table class="table">
+                                    <thead>
+                                        <tr style="text-align: center;">
+                                            <th>Kalimat</th>
+                                            <th>Hasil Prediksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for index in dictData['tweet'] %}
+                                        <tr style="text-align: center;">
+                                            <td>{{ dictData['normalize'][index] }}</td>
+                                            <td>
+                                                {% if dictData['HS'][index] == '1' %}
+                                                    Ujaran Kebencian ({{ "{:.0f}%".format(dictData['HS_Persen'][index]) }}),
+                                                {% endif %}
+                                                {% if dictData['Non_HS'][index] == '1' %}
+                                                    Bukan Ujaran Kebencian ({{ "{:.0f}%".format(dictData['Non_HS_Persen'][index]) }}),
+                                                {% endif %}
+                                                
+                                                {% if dictData['Abusive'][index] == '1' %}
+                                                    Kata Kasar ({{ "{:.0f}%".format(dictData['Abusive_Persen'][index]) }}),
+                                                {% endif %}
+                                                
+                                                {% if dictData['HS_individual'][index] == '1' %}
+                                                    Target - Individu ({{ "{:.0f}%".format(dictData['HS_individual_Persen'][index]) }}),
+                                                {% endif %}
+                                                {% if dictData['HS_Group'][index] == '1' %}
+                                                    Target - Kelompok ({{ "{:.0f}%".format(dictData['HS_Group_Persen'][index]) }}),
+                                                {% endif %}
+
+                                                {% if dictData['HS_Physical'][index] == '1' %}
+                                                    Kategori - Fisik ({{ "{:.0f}%".format(dictData['HS_Physical_Persen'][index]) }}),
+                                                {% endif %}
+                                                {% if dictData['HS_Race'][index] == '1' %}
+                                                    Kategori - Ras ({{ "{:.0f}%".format(dictData['HS_Race_Persen'][index]) }}),
+                                                {% endif %}
+                                                {% if dictData['HS_Religion'][index] == '1' %}
+                                                    Kategori - Agama ({{ "{:.0f}%".format(dictData['HS_Religion_Persen'][index]) }}),
+                                                {% endif %}
+                                                {% if dictData['HS_Other'][index] == '1' %}
+                                                    Kategori - Ujaran Lain ({{ "{:.0f}%".format(dictData['HS_Other_Persen'][index]) }}),
+                                                {% endif %}
+                                                {% if dictData['HS_Gender'][index] == '1' %}
+                                                    Kategori - Jenis Kelamin  ({{ "{:.0f}%".format(dictData['HS_Gender_Persen'][index]) }}),
+                                                {% endif %}
+
+                                                {% if dictData['HS_Weak'][index] == '1' %}
+                                                    Level - Lemah ({{ "{:.0f}%".format(dictData['HS_Weak_Persen'][index]) }}),
+                                                {% endif %}
+                                                {% if dictData['HS_Moderate'][index] == '1' %}
+                                                    Level - Sedang ({{ "{:.0f}%".format(dictData['HS_Moderate_Persen'][index]) }}),
+                                                {% endif %}
+                                                {% if dictData['HS_Strong'][index] == '1' %}
+                                                    Level - Kuat ({{ "{:.0f}%".format(dictData['HS_Strong_Persen'][index]) }}),
+                                                {% endif %}
+                                                
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12 mt-4">
+        <div class="card">
+            <div class="card-header">
+                <center><strong><h5><i class="fab fa-twitter"></i> Ketentuan prediksi kalimat menggunakan unggah berkas</h5></strong></center>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-12 mb-3">
+                        <p class="card-text text-center">Berkas harus berisi <strong>satu</strong> kolom dengan nama <strong>tweet</strong>, dengan maksimal kalimat yang dicek <strong>50</strong>. Unduh Format <a href="https://drive.google.com/file/d/1yF3PqRiEx9Uggccfyj97UOwOLET2s_Bt/view?usp=sharing" target="_blank">disini</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('#prosesSentimen').click(function(){
+
+            // Cek Form
+            var tweet = $('#batchSentimen').val()
+
+            if(tweet!=""){
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Sabar ya, Sedang Berproses !!!',
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: false,
+                    text: 'Proses Prediksi Sedikit Lebih Lama'
+                });
+            }
+        });
+    });
+</script>
+
+{% include 'main/footer.html' %}

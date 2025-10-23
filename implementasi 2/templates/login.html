@@ -1,0 +1,154 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" type=text/css href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+  <!-- SWAL -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    html,
+body {
+  height: 100%;
+}
+
+.form-signin {
+  max-width: 330px;
+  padding: 1rem;
+}
+
+.form-signin .form-floating:focus-within {
+  z-index: 2;
+}
+
+.form-signin input[type="text"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.google-login-btn {
+  background: #4285f4;
+  color: white;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  width: 100%;
+  margin-bottom: 15px;
+  transition: background-color 0.3s;
+}
+
+.google-login-btn:hover {
+  background: #357ae8;
+  color: white;
+  text-decoration: none;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 15px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #ddd;
+}
+
+.divider span {
+  padding: 0 10px;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.login-container {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  padding: 2rem;
+}
+  </style>
+</head>
+<body class="d-flex align-items-center py-4 bg-body-tertiary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
+  
+  <main class="form-signin w-100 m-auto">
+    <div class="login-container">
+      <form action="/proses-login" method="POST">
+        {{ form.csrf_token }}
+        
+        <div class="text-center mb-4">
+          <i class="fas fa-comment-dots fa-3x text-primary mb-3"></i>
+          <h1 class="h3 mb-3 fw-normal">Sistem Analisis Sentimen</h1>
+          <p class="text-muted">Silakan login untuk melanjutkan</p>
+        </div>
+
+        <!-- Tombol Login Google -->
+        <a href="{{ url_for('google_login') }}" class="google-login-btn">
+          <img src="https://developers.google.com/identity/images/g-logo.png" 
+               style="width: 20px; height: 20px; margin-right: 10px; background: white; padding: 2px; border-radius: 2px;">
+          Login dengan Google
+        </a>
+
+        <div class="divider">
+          <span>ATAU</span>
+        </div>
+
+        <!-- Form Login Manual -->
+        <div class="form-floating" style="margin-bottom:1rem;">
+          <input type="text" name="username" id="username" class="form-control" placeholder="Username" required>
+          <label for="username"><i class="fas fa-user"></i> Username</label>
+        </div>
+        <div class="form-floating">
+          <input type="password" name="password" id="password" class="form-control" placeholder="******" required>
+          <label for="password"><i class="fas fa-lock"></i> Password</label>
+        </div>
+
+        <button class="btn btn-primary w-100 py-2" type="submit">
+          <i class="fas fa-sign-in-alt"></i> Sign in
+        </button>
+      </form>
+
+      <div class="text-center mt-3">
+        <small class="text-muted">
+          Untuk login demo gunakan:<br>
+          <strong>Username:</strong> arimuzakir<br>
+          <strong>Password:</strong> risetBaru321
+        </small>
+      </div>
+    </div>
+  </main>
+
+<script>
+  $(document).ready(function(){
+    {% if error %}
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Gagal',
+        text: '{{ error }}',
+        showConfirmButton: true,
+        allowOutsideClick: true,
+        allowEscapeKey: true,
+        allowEnterKey: true
+      });
+    {% endif %}
+  });
+</script>
+</body>
+</html>

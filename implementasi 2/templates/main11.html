@@ -1,0 +1,333 @@
+{% with title='Sistem Deteksi Ujaran Kebencian Twitter' %}
+    {% include 'main/header.html' %}
+{% endwith %}
+
+{% set check = '<i class="fas fa-check" style="color: #6bed72;"></i>' %}
+{% set times = '<i class="fas fa-times" style="color: #ff0000;"></i>' %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <center><strong><h5><i class="fab fa-twitter"></i>Cek Ujaran Kebencian</h5></strong></center>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('cekSentimenAnalysis')}}" method="POST">
+                    {{ form.csrf_token }}
+                    <div class="row">
+                        <div class="col-sm-4 mb-3">
+                            <textarea name="tweet" id="tweet" type="text" aria-label="Paste Tweet Disini" class="form-control" placeholder="Paste Disini" style="border-radius: unset;" required rows="2">{{ oldTweet }}</textarea>
+                        </div>
+                        <div class="col-sm-2 mb-3">
+                            <select name="kategori" id="kategori" class="form-select" aria-label="Default select example" style="border-radius: unset;" requried>
+                                <option value="" readonly>--- Pilih Sentimen ---</option>
+                                <option value="0" {% if sentimen == "0" %} selected {% endif %} >Hatespeech</option>
+                                <option value="1" {% if sentimen == "1" %} selected {% endif %}>Abusive</option>
+                                <option value="2" {% if sentimen == "2" %} selected {% endif %}>Target</option>
+                                <option value="3" {% if sentimen == "3" %} selected {% endif %}>Kategori</option>
+                                <option value="4" {% if sentimen == "4" %} selected {% endif %}>Level</option>
+                                <option value="5" {% if sentimen == "5" %} selected {% endif %}>Semua</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-2 mb-3">
+                            <select name="model" id="model" class="form-select" aria-label="Default select example" style="border-radius: unset;" requried>
+                                <option value="" readonly>--- Pilih Model ---</option>
+                                <option value="CNN" {% if model == "CNN" %} selected {% endif %} >CNN</option>
+                                <!--<option value="BIGRU" {% if model == "BIGRU" %} selected {% endif %}>BIGRU</option>
+                                <option value="LSTM" {% if model == "LSTM" %} selected {% endif %}>BILSTM</option>-->
+                            </select>
+                        </div>
+                        <div class="col-sm-2 mb-3">
+                            <select name="perluasan" id="perluasan" class="form-select" aria-label="Default select example" style="border-radius: unset;" requried>
+                                <option value="" readonly>--- Model Perluasan ---</option>
+                                <option value="0" {% if perluasan == "0" %} selected {% endif %} >Tidak</option>
+                                <option value="1" {% if perluasan == "1" %} selected {% endif %}>Iya</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-2 mb-3">
+                            <input type="checkbox" class="form-check-input" name="perluasanKalimat" id="perluasanKalimat" {% if perluasanKalimat == "1" %} checked {% endif %}">
+                            <label class="form-check-label" for="myCheckbox">Perluasan Kalimat</label>
+                        </div>
+                        <div class="col-sm-2 mb-3">
+                            <button id="prosesSentimen" type="submit" class="btn btn-success"><i class="fas fa-search"></i> Cek Kalimat</button>
+                        </div>
+                    </div>
+                </form>
+
+                {% if hasil=='1' %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div style="overflow-x:auto;">
+                            <table class="table">
+                                <thead>
+                                    <tr style="text-align: center;">
+                                        {% if sentimen=='0' or sentimen=='5' %}
+                                            <th scope="col">NON HS</th>
+                                            <th scope="col">HS</th>
+                                        {% endif %}
+
+                                        {% if sentimen=='1' or sentimen=='5' %}
+                                            <th scope="col">Abusive</th>
+                                        {% endif %}
+
+                                        {% if sentimen=='2' or sentimen=='5' %}
+                                            <th scope="col">Individual</th>
+                                            <th scope="col">Grup</th>
+                                        {% endif %}
+
+                                        {% if sentimen=='3' or sentimen=='5' %}
+                                            <th scope="col">Agama</th>
+                                            <th scope="col">Ras</th>
+                                            <th scope="col">Fisik</th>
+                                            <th scope="col">Gender</th>
+                                            <th scope="col">Lain-lain</th>
+                                        {% endif %}
+
+                                        {% if sentimen=='4' or sentimen=='5' %}
+                                            <th scope="col">Lemah</th>
+                                            <th scope="col">Sedang</th>
+                                            <th scope="col">Kuat</th>
+                                        {% endif %}
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="text-align: center;">
+                                        {% if sentimen=='0' or sentimen=='5' %}
+                                            <td>
+                                                {% if data[0]=='1' %}
+                                                    {{ check | safe }}
+                                                {% else %}
+                                                    {{ times | safe }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if data[1]=='1' %}
+                                                    {{ check | safe }}
+                                                {% else %}
+                                                    {{ times | safe }}
+                                                {% endif %}
+                                            </td>
+                                        {% endif %}
+                                        
+                                        {% if sentimen=='1' or sentimen=='5' %}
+                                            <td>
+                                                {% if data[2]=='1' %}
+                                                    {{ check | safe }}
+                                                {% else %}
+                                                    {{ times | safe }}
+                                                {% endif %}
+                                            </td>
+                                        {% endif %}
+
+                                        {% if sentimen=='2' or sentimen=='5' %}
+                                        <td>
+                                            {% if data[3]=='1' %}
+                                                {{ check | safe }}
+                                            {% else %}
+                                                {{ times | safe }}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if data[4]=='1' %}
+                                                {{ check | safe }}
+                                            {% else %}
+                                                {{ times | safe }}
+                                            {% endif %}
+                                        </td>
+                                        {% endif %}
+
+                                        {% if sentimen=='3' or sentimen=='5' %}
+                                            <td>
+                                                {% if data[5]=='1' %}
+                                                    {{ check | safe }}
+                                                {% else %}
+                                                    {{ times | safe }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if data[6]=='1' %}
+                                                    {{ check | safe }}
+                                                {% else %}
+                                                    {{ times | safe }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if data[7]=='1' %}
+                                                    {{ check | safe }}
+                                                {% else %}
+                                                    {{ times | safe }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if data[8]=='1' %}
+                                                    {{ check | safe }}
+                                                {% else %}
+                                                    {{ times | safe }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if data[9]=='1' %}
+                                                    {{ check | safe }}
+                                                {% else %}
+                                                    {{ times | safe }}
+                                                {% endif %}
+                                            </td>
+                                        {% endif %}
+
+                                        {% if sentimen=='4' or sentimen=='5' %}
+                                            <td>
+                                                {% if data[10]=='1' %}
+                                                    {{ check | safe }}
+                                                {% else %}
+                                                    {{ times | safe }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if data[11]=='1' %}
+                                                    {{ check | safe }}
+                                                {% else %}
+                                                    {{ times | safe }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if data[12]=='1' %}
+                                                    {{ check | safe }}
+                                                {% else %}
+                                                    {{ times | safe }}
+                                                {% endif %}
+                                            </td>
+                                        {% endif %}
+
+                                    </tr>
+                                    
+                                    <tr style="text-align: center;">
+                                        {% if sentimen=='0' or sentimen=='5' %}
+                                            <td>
+                                                {{ "{:.0f}%".format(proba[0][0]) }}
+                                            </td>
+                                            <td>
+                                                {{ "{:.0f}%".format(proba[0][1]) }}
+                                            </td>
+                                        {% endif %}
+                                        
+                                        {% if sentimen=='1' or sentimen=='5' %}
+                                            <td>
+                                                {{ "{:.0f}%".format(proba[0][2]) }}
+                                            </td>
+                                        {% endif %}
+
+                                        {% if sentimen=='2' or sentimen=='5' %}
+                                            <td>
+                                                {{ "{:.0f}%".format(proba[0][3]) }}
+                                            </td>
+                                            <td>
+                                                {{ "{:.0f}%".format(proba[0][4]) }}
+                                            </td>
+                                        {% endif %}
+
+                                        {% if sentimen=='3' or sentimen=='5' %}
+                                            <td>
+                                                {{ "{:.0f}%".format(proba[0][5]) }}
+                                            </td>
+                                            <td>
+                                                {{ "{:.0f}%".format(proba[0][6]) }}
+                                            </td>
+                                            <td>
+                                                {{ "{:.0f}%".format(proba[0][7]) }}
+                                            </td>
+                                            <td>
+                                                {{ "{:.0f}%".format(proba[0][8]) }}
+                                            </td>
+                                            <td>
+                                                {{ "{:.0f}%".format(proba[0][9]) }}
+                                            </td>
+                                        {% endif %}
+
+                                        {% if sentimen=='4' or sentimen=='5' %}
+                                            <td>
+                                                {{ "{:.0f}%".format(proba[0][10]) }}
+                                            </td>
+                                            <td>
+                                                {{ "{:.0f}%".format(proba[0][11]) }}
+
+                                            </td>
+                                            <td>
+                                                {{ "{:.0f}%".format(proba[0][12]) }}
+                                            </td>
+                                        {% endif %}
+
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <h5 class="card-header">Keterangan</h5>
+                            <div class="card-body">
+                                <p class="card-text"><strong>Kalimat: </strong>{{ normalTeks }}</p>
+                                {% if perluasanKalimat=='1':%}
+                                    <p class="card-text"><strong>Perluasan Kalimat: </strong>{{ kalimatPerbaikan }}</p>
+                                {% endif %}
+                                <p class="card-text">
+                                    {% if data[0]=='1':%}
+                                        <strong>Tidak terdeteksi sebagai ujaran kebencian</strong>, 
+                                        {{ 'namun terdeteksi sebagai <strong>Abusive</strong>' | safe if data[2]=='1' else '' }}.
+                                    {% elif data[1]=='1':%}
+                                        <strong>Terdeteksi sebagai ujaran kebencian</strong>, 
+                                        {{ 'termasuk kalimat <strong>Abusive</strong>' | safe if data[2]=='1' else '' }}, 
+                                        <!-- dengan kategori ujaran kebencian {{ '<strong>Grup</strong>' | safe if data[3]=='1' else '<strong>Individual</strong>' | safe }}, 
+                                        target {{ '<strong>Agama</strong>,' | safe if data[5]=='1' }}
+                                        {{ '<strong>Ras</strong>,' | safe if data[6]=='1' }}
+                                        {{ '<strong>Fisik</strong>,' | safe if data[7]=='1' }}
+                                        {{ '<strong>Gender</strong>,' | safe if data[8]=='1' }}
+                                        {{ '<strong>Lain-lain</strong>,' | safe if data[9]=='1' }}, 
+                                        dan tingkat ujaran kebencian 
+                                        {% if data[10]=='1' %}
+                                            <strong>Lemah</strong>
+                                        {% elif data[11]=='1' %}
+                                            <strong>Sedang</strong>
+                                        {% else %}
+                                            <strong>Kuat</strong>
+                                        {% endif %} -->
+                                    {% endif %}
+                                .</p>
+                                <p class="card-text">Waktu proses <strong>{{ totalTime//60 }}</strong> menit <strong>{{ totalTime % 60}} detik</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('#prosesSentimen').click(function(){
+
+            // Cek Form
+            var tweet = $('#tweet').val()
+
+            if(tweet!=""){
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Tunggu Sebentar',
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: false,
+                    text: 'Proses Klasifikasi Sedang Berjalan'
+                });
+            }
+        });
+    });
+</script>
+
+{% include 'main/footer.html' %}

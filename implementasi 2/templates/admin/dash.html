@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Kata Slang</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --info-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            margin-bottom: 1rem;
+        }
+        
+        .card-header {
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 1.5rem;
+        }
+        
+        .alert-info {
+            border-radius: 10px;
+            border: none;
+            background: var(--info-gradient);
+            color: white;
+        }
+        
+        .btn-success {
+            background: var(--success-gradient);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+        }
+        
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 12px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            border-color: #4facfe;
+            box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.25);
+        }
+        
+        .badge {
+            font-size: 0.7em;
+            padding: 6px 10px;
+            border-radius: 15px;
+        }
+        
+        .stats-card {
+            transition: transform 0.3s ease;
+            border: none;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .count-display {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .validation-alert {
+            border-left: 4px solid #ffc107;
+        }
+        
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+        }
+        
+        .login-badge {
+            font-size: 0.65em;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1 class="h3 text-primary">
+                        <i class="fas fa-language me-2"></i>Tambah Kata Slang
+                    </h1>
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted me-3">Sistem Kamus Slang</span>
+                        <span class="badge bg-primary">v1.0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info User & Logout -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-info d-flex justify-content-between align-items-center" id="userInfoAlert">
+                    <div class="d-flex align-items-center">
+                        <!-- User Picture -->
+                        <div id="userPictureContainer">
+                            <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3 user-avatar">
+                                <i class="fas fa-user-circle text-primary fa-lg"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <!-- User Name -->
+                            <strong class="fs-6" id="userName">Pengguna</strong> 
+                            <!-- User Email -->
+                            <div class="text-white-50" style="font-size: 0.85rem;" id="userEmail">email@example.com</div>
+                            <!-- Login Type -->
+                            <div id="loginType">
+                                <span class="badge bg-light text-dark mt-1 login-badge">
+                                    <i class="fas fa-key me-1"></i> Manual Login
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Logout Button -->
+                    <a href="#" class="btn btn-sm btn-light text-danger" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt me-1"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Tambah Kata Slang -->
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="text-center">
+                            <h5 class="card-title mb-0">
+                                <i class="fab fa-twitter me-2"></i> Tambah Kata Slang Baru
+                            </h5>
+                            <p class="mb-0 opacity-75" style="font-size: 0.9rem;">Tambahkan kata slang dan padanannya ke dalam kamus</p>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <form action="#" method="POST" id="slangForm">
+                            <!-- CSRF Token -->
+                            <input type="hidden" name="csrf_token" id="csrfToken" value="">
+                            
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 mb-4">
+                                    <label for="slang" class="form-label fw-semibold">
+                                        <i class="fas fa-comment-dots me-2"></i>Kata Slang
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea name="slang" id="slang" class="form-control" 
+                                              placeholder="Contoh: gpp, bgst, wkwk, lol, brb, cmiiw, tbh, imho, btw" 
+                                              required rows="4"></textarea>
+                                    <div class="form-text text-muted mt-2">
+                                        <small>
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Pisahkan setiap kata slang dengan koma. Contoh: gpp, bgst, wkwk
+                                        </small>
+                                    </div>
+                                    <!-- Count Display -->
+                                    <div class="text-end mt-2">
+                                        <small class="text-muted count-display">
+                                            <span id="slangCount">0</span> kata slang terdeteksi
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-sm-12 mb-4">
+                                    <label for="normal" class="form-label fw-semibold">
+                                        <i class="fas fa-language me-2"></i>Kata Normal
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea name="normal" id="normal" class="form-control" 
+                                              placeholder="Contoh: tidak apa-apa, bangsat, tertawa, tertawa terbahak-bahak, sebentar lagi kembali, correct me if i'm wrong, to be honest, in my humble opinion, by the way" 
+                                              required rows="4"></textarea>
+                                    <div class="form-text text-muted mt-2">
+                                        <small>
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Pisahkan setiap kata normal dengan koma sesuai urutan kata slang.
+                                        </small>
+                                    </div>
+                                    <!-- Count Display -->
+                                    <div class="text-end mt-2">
+                                        <small class="text-muted count-display">
+                                            <span id="normalCount">0</span> kata normal terdeteksi
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Validation Info -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="alert alert-warning validation-alert">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
+                                            <div class="flex-grow-1">
+                                                <strong class="d-block mb-1">Perhatian:</strong>
+                                                <span>Pastikan jumlah kata slang dan kata normal sama dan sesuai urutan.</span>
+                                                <!-- Count Status -->
+                                                <div class="mt-2" id="countStatus"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <button type="submit" class="btn btn-success btn-lg px-5" id="submitBtn">
+                                        <i class="fas fa-plus-circle me-2"></i> Tambah ke Kamus
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-lg ms-2" id="clearBtn">
+                                        <i class="fas fa-eraser me-2"></i> Bersihkan
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mt-4">
+            <div class="col-md-4 mb-3">
+                <div class="card bg-primary text-white stats-card">
+                    <div class="card-body text-center py-4">
+                        <i class="fas fa-book fa-2x mb-3"></i>
+                        <h5 class="mb-2">Total Kata</h5>
+                        <h2 class="mb-0" id="totalWords">1,247</h2>
+                        <small class="opacity-75">kata dalam kamus</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card bg-success text-white stats-card">
+                    <div class="card-body text-center py-4">
+                        <i class="fas fa-plus-circle fa-2x mb-3"></i>
+                        <h5 class="mb-2">Ditambah Hari Ini</h5>
+                        <h2 class="mb-0" id="todayWords">12</h2>
+                        <small class="opacity-75">kata baru</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card bg-info text-white stats-card">
+                    <div class="card-body text-center py-4">
+                        <i class="fas fa-users fa-2x mb-3"></i>
+                        <h5 class="mb-2">Pengguna Aktif</h5>
+                        <h2 class="mb-0" id="activeUsers">156</h2>
+                        <small class="opacity-75">pengguna</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <p class="text-muted">
+                    <small>
+                        &copy; 2024 Sistem Kamus Slang. All rights reserved. | 
+                        <i class="fas fa-code"></i> dengan <i class="fas fa-heart text-danger"></i> oleh Tim Pengembang
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        // Application state
+        const AppState = {
+            user: {
+                name: 'Pengguna',
+                email: 'email@example.com',
+                picture: null,
+                loginType: 'manual'
+            },
+            formData: {
+                oldSlang: '',
+                oldNormal: ''
+            },
+            stats: {
+                totalWords: 1247,
+                todayWords: 12,
+                activeUsers: 156
+            }
+        };
+
+        // Initialize application
+        $(document).ready(function(){
+            console.log('🚀 Initializing Slang Dictionary Application...');
+            
+            initializeApp();
+            setupEventListeners();
+            updateCount();
+            
+            console.log('✅ Application initialized successfully');
+        });
+
+        // Initialize application components
+        function initializeApp() {
+            // Load user data
+            loadUserData();
+            
+            // Load form data if any
+            loadFormData();
+            
+            // Update statistics
+            updateStatistics();
+            
+            // Generate CSRF token
+            generateCSRFToken();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Form submission
+            $('#slangForm').on('submit', handleFormSubmit);
+            
+            // Input events
+            $('#slang, #normal').on('input', function() {
+                updateCount();
+                validateFormRealTime();
+            });
+            
+            // Clear button
+            $('#clearBtn').on('click', clearForm);
+            
+            // Format input on blur
+            $('#slang, #normal').on('blur', formatInput);
+            
+            // Logout button
+            $('#logoutBtn').on('click', handleLogout);
+        }
+
+        // Load user data
+        function loadUserData() {
+            // In a real app, this would come from your backend
+            const userData = {
+                name: 'John Doe',
+                email: 'john.doe@example.com',
+                picture: null,
+                loginType: 'google'
+            };
+            
+            AppState.user = { ...AppState.user, ...userData };
+            updateUserInterface();
+        }
+
+        // Load form data
+        function loadFormData() {
+            // In a real app, this would come from your backend session
+            const savedData = {
+                oldSlang: 'gpp, wkwk, lol',
+                oldNormal: 'tidak apa-apa, tertawa, tertawa terbahak-bahak'
+            };
+            
+            AppState.formData = { ...AppState.formData, ...savedData };
+            
+            // Populate form fields
+            if (AppState.formData.oldSlang) {
+                $('#slang').val(AppState.formData.oldSlang);
+            }
+            if (AppState.formData.oldNormal) {
+                $('#normal').val(AppState.formData.oldNormal);
+            }
+        }
+
+        // Update user interface
+        function updateUserInterface() {
+            $('#userName').text(AppState.user.name);
+            $('#userEmail').text(AppState.user.email);
+            
+            // Update login type badge
+            const loginTypeHtml = AppState.user.loginType === 'google' 
+                ? '<span class="badge bg-light text-dark mt-1 login-badge"><i class="fab fa-google me-1"></i> Google Login</span>'
+                : '<span class="badge bg-light text-dark mt-1 login-badge"><i class="fas fa-key me-1"></i> Manual Login</span>';
+            
+            $('#loginType').html(loginTypeHtml);
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            $('#totalWords').text(AppState.stats.totalWords.toLocaleString());
+            $('#todayWords').text(AppState.stats.todayWords);
+            $('#activeUsers').text(AppState.stats.activeUsers.toLocaleString());
+        }
+
+        // Generate CSRF token
+        function generateCSRFToken() {
+            const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            $('#csrfToken').val(token);
+        }
+
+        // Handle form submission
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            console.log('📝 Form submission started...');
+            
+            if (!validateForm()) {
+                return false;
+            }
+            
+            // Show loading state
+            showLoadingState();
+            
+            // Simulate API call
+            setTimeout(() => {
+                handleFormSuccess();
+            }, 2000);
+        }
+
+        // Validate form
+        function validateForm() {
+            const slang = $('#slang').val().trim();
+            const normal = $('#normal').val().trim();
+            
+            // Check if fields are empty
+            if (!slang || !normal) {
+                showError('Harap isi kedua kolom!');
+                return false;
+            }
+            
+            // Check if number of items match
+            const slangWords = getWordsFromText(slang);
+            const normalWords = getWordsFromText(normal);
+            
+            if (slangWords.length !== normalWords.length) {
+                showWarning(
+                    'Jumlah Tidak Sesuai',
+                    `Jumlah kata slang (${slangWords.length}) dan kata normal (${normalWords.length}) tidak sama.<br>Pastikan jumlahnya sama dan sesuai urutan.`
+                );
+                return false;
+            }
+            
+            // Check for empty words
+            const emptySlang = slangWords.some(word => !word.trim());
+            const emptyNormal = normalWords.some(word => !word.trim());
+            
+            if (emptySlang || emptyNormal) {
+                showWarning('Kata Kosong Ditemukan', 'Terdapat kata yang kosong. Pastikan semua kata telah diisi dengan benar.');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Real-time form validation
+        function validateFormRealTime() {
+            const slang = $('#slang').val().trim();
+            const normal = $('#normal').val().trim();
+            const slangWords = getWordsFromText(slang);
+            const normalWords = getWordsFromText(normal);
+            
+            const isValid = slangWords.length === normalWords.length && slangWords.length > 0;
+            $('#submitBtn').prop('disabled', !isValid);
+        }
+
+        // Update count display
+        function updateCount() {
+            const slangText = $('#slang').val();
+            const normalText = $('#normal').val();
+            
+            const slangWords = getWordsFromText(slangText);
+            const normalWords = getWordsFromText(normalText);
+            
+            const slangCount = slangWords.length;
+            const normalCount = normalWords.length;
+            
+            // Update count displays
+            $('#slangCount').text(slangCount);
+            $('#normalCount').text(normalCount);
+            
+            // Update status message
+            updateCountStatus(slangCount, normalCount);
+        }
+
+        // Get words from text
+        function getWordsFromText(text) {
+            return text.split(',').filter(word => word.trim());
+        }
+
+        // Update count status
+        function updateCountStatus(slangCount, normalCount) {
+            let statusHtml = '';
+            let statusClass = '';
+            
+            if (slangCount === 0 && normalCount === 0) {
+                statusHtml = '';
+            } else if (slangCount === normalCount && slangCount > 0) {
+                statusClass = 'text-success';
+                statusHtml = `<i class="fas fa-check-circle me-1"></i> Jumlah sesuai (${slangCount} pasang kata)`;
+            } else {
+                statusClass = 'text-danger';
+                statusHtml = `<i class="fas fa-exclamation-triangle me-1"></i> Jumlah tidak sesuai (Slang: ${slangCount}, Normal: ${normalCount})`;
+            }
+            
+            $('#countStatus')
+                .removeClass('text-success text-danger')
+                .addClass(statusClass)
+                .html(statusHtml);
+        }
+
+        // Format input
+        function formatInput() {
+            let value = $(this).val();
+            // Remove extra spaces and normalize commas
+            value = value.replace(/\s*,\s*/g, ',') // Normalize spaces around commas
+                        .replace(/,+/g, ',')       // Remove multiple commas
+                        .replace(/^,|,$/g, '')     // Remove leading/trailing commas
+                        .trim();
+            $(this).val(value);
+            updateCount();
+        }
+
+        // Clear form
+        function clearForm() {
+            Swal.fire({
+                title: 'Bersihkan Form?',
+                text: "Semua data yang telah diinput akan dihapus",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Bersihkan!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#slang').val('');
+                    $('#normal').val('');
+                    updateCount();
+                    showSuccess('Dibersihkan!', 'Form telah berhasil dibersihkan.');
+                }
+            });
+        }
+
+        // Show loading state
+        function showLoadingState() {
+            $('#submitBtn')
+                .prop('disabled', true)
+                .html('<i class="fas fa-spinner fa-spin me-2"></i> Memproses...');
+        }
+
+        // Handle form success
+        function handleFormSuccess() {
+            // Reset form
+            $('#slangForm')[0].reset();
+            updateCount();
+            
+            // Show success message
+            showSuccess(
+                'Berhasil!', 
+                'Data berhasil ditambahkan ke kamus',
+                function() {
+                    // Update statistics
+                    AppState.stats.totalWords += getWordsFromText($('#slang').val()).length;
+                    AppState.stats.todayWords += getWordsFromText($('#slang').val()).length;
+                    updateStatistics();
+                    
+                    // Reset button
+                    $('#submitBtn')
+                        .prop('disabled', false)
+                        .html('<i class="fas fa-plus-circle me-2"></i> Tambah ke Kamus');
+                }
+            );
+        }
+
+        // Handle logout
+        function handleLogout(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Konfirmasi Logout',
+                text: "Apakah Anda yakin ingin logout?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Logout!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // In a real app, this would redirect to logout endpoint
+                    showSuccess('Logout Berhasil', 'Anda telah berhasil logout.');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                }
+            });
+        }
+
+        // Utility functions for notifications
+        function showSuccess(title, text, callback = null) {
+            Swal.fire({
+                icon: 'success',
+                title: title,
+                text: text,
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'OK',
+                timer: 3000,
+                timerProgressBar: true,
+            }).then((result) => {
+                if (callback && typeof callback === 'function') {
+                    callback();
+                }
+            });
+        }
+
+        function showError(text) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: text,
+                confirmButtonColor: '#d33',
+            });
+        }
+
+        function showWarning(title, html) {
+            Swal.fire({
+                icon: 'warning',
+                title: title,
+                html: html,
+                confirmButtonColor: '#f39c12',
+            });
+        }
+    </script>
+</body>
+</html>
