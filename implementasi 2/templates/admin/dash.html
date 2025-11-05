@@ -1,658 +1,1248 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Kata Slang</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Slang Dictionary</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --info-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      :root {
+        --primary: #3b82f6;
+        --primary-dark: #1d4ed8;
+        --primary-light: #60a5fa;
+        --secondary: #6366f1;
+        --success: #10b981;
+        --info: #06b6d4;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        --gradient-secondary: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        --gradient-glass: linear-gradient(
+          135deg,
+          rgba(59, 130, 246, 0.1) 0%,
+          rgba(29, 78, 216, 0.1) 100%
+        );
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+        --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background: var(--gradient-primary);
+        min-height: 100vh;
+        color: #374151;
+      }
+
+      .app-container {
+        min-height: 100vh;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      /* Sidebar Styles */
+      .sidebar {
+        background: var(--gradient-primary);
+        color: white;
+        min-height: 100vh;
+        padding: 0;
+        box-shadow: var(--shadow-xl);
+        position: fixed;
+        width: 280px;
+        z-index: 1000;
+        transition: all 0.3s ease;
+      }
+
+      .sidebar.collapsed {
+        width: 80px;
+      }
+
+      .sidebar-header {
+        padding: 2rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+      }
+
+      .sidebar-logo {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .sidebar-title {
+        color: white;
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin: 1rem 0 0.5rem;
+      }
+
+      .sidebar-subtitle {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.8rem;
+      }
+
+      .sidebar-menu {
+        padding: 1.5rem 0;
+      }
+
+      .nav-item {
+        margin-bottom: 0.5rem;
+      }
+
+      .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        padding: 1rem 1.5rem;
+        border-radius: 0;
+        border-left: 4px solid transparent;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-decoration: none;
+      }
+
+      .nav-link:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+        border-left-color: var(--primary-light);
+      }
+
+      .nav-link.active {
+        color: white;
+        background: rgba(255, 255, 255, 0.15);
+        border-left-color: var(--success);
+      }
+
+      .nav-link i {
+        width: 20px;
+        text-align: center;
+      }
+
+      .nav-text {
+        transition: opacity 0.3s ease;
+      }
+
+      .sidebar.collapsed .nav-text {
+        opacity: 0;
+        display: none;
+      }
+
+      .sidebar.collapsed .sidebar-title,
+      .sidebar.collapsed .sidebar-subtitle {
+        display: none;
+      }
+
+      .toggle-sidebar {
+        position: absolute;
+        top: 1rem;
+        right: -12px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.8rem;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+      }
+
+      .toggle-sidebar:hover {
+        transform: scale(1.1);
+      }
+
+      /* Main Content */
+      .main-content {
+        margin-left: 280px;
+        transition: all 0.3s ease;
+        min-height: 100vh;
+      }
+
+      .main-content.expanded {
+        margin-left: 80px;
+      }
+
+      .app-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 300px;
+        background: var(--gradient-primary);
+        clip-path: polygon(0 0, 100% 0, 100% 70%, 0 100%);
+        z-index: 0;
+      }
+
+      /* Header Styles */
+      .main-header {
+        position: relative;
+        z-index: 10;
+        padding: 2rem 0 1rem;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .logo {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .logo i {
+        font-size: 1.5rem;
+        color: white;
+      }
+
+      .header-title {
+        color: white;
+        font-weight: 700;
+        font-size: 1.8rem;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .header-subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.9rem;
+        margin: 0;
+      }
+
+      /* User Info Card */
+      .user-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: var(--shadow-lg);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 10;
+        transition: all 0.3s ease;
+      }
+
+      .user-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+      }
+
+      .user-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        border: 3px solid white;
+        box-shadow: var(--shadow-md);
+      }
+
+      .user-info {
+        flex: 1;
+      }
+
+      .user-name {
+        font-weight: 600;
+        color: var(--dark);
+        margin: 0;
+      }
+
+      .user-email {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin: 0;
+      }
+
+      .login-badge {
+        background: var(--gradient-success);
+        color: white;
+        border: none;
+        font-size: 0.7rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+      }
+
+      .logout-btn {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: 12px;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .logout-btn:hover {
+        background: var(--danger);
+        color: white;
+        transform: translateY(-2px);
+      }
+
+      /* Main Card */
+      .main-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: var(--shadow-xl);
+        border: none;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 10;
+        transition: all 0.3s ease;
+      }
+
+      .main-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      }
+
+      .card-header-custom {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 2rem;
+        border: none;
+      }
+
+      .card-title {
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin: 0;
+      }
+
+      .card-subtitle {
+        opacity: 0.9;
+        font-size: 0.95rem;
+        margin: 0.5rem 0 0;
+      }
+
+      .card-body-custom {
+        padding: 2rem;
+      }
+
+      /* Form Styles */
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .form-label i {
+        color: var(--primary);
+      }
+
+      .form-control-custom {
+        border: 2px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 1rem 1.2rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: #fafafa;
+      }
+
+      .form-control-custom:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        background: white;
+        transform: translateY(-2px);
+      }
+
+      .form-text-custom {
+        font-size: 0.8rem;
+        color: #6b7280;
+        margin-top: 0.5rem;
+      }
+
+      .count-display {
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.3rem 0.8rem;
+        border-radius: 12px;
+        background: #f3f4f6;
+        display: inline-block;
+      }
+
+      /* Validation Alert */
+      .validation-alert {
+        background: var(--gradient-glass);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 16px;
+        border-left: 4px solid var(--warning);
+        padding: 1.2rem;
+      }
+
+      .alert-icon {
+        font-size: 1.5rem;
+        color: var(--warning);
+      }
+
+      /* Buttons */
+      .btn-custom-primary {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        border-radius: 16px;
+        padding: 1rem 2.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-md);
+      }
+
+      .btn-custom-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+        color: white;
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+      }
+
+      .btn-custom-secondary {
+        background: white;
+        color: #6b7280;
+        border: 2px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .btn-custom-secondary:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-2px);
+      }
+
+      /* Stats Cards */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+      }
+
+      .stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: var(--shadow-md);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--gradient-primary);
+      }
+
+      .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-xl);
+      }
+
+      .stat-card:nth-child(1)::before {
+        background: var(--gradient-primary);
+      }
+      .stat-card:nth-child(2)::before {
+        background: var(--gradient-success);
+      }
+      .stat-card:nth-child(3)::before {
+        background: var(--gradient-warning);
+      }
+
+      .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+      }
+
+      .stat-card:nth-child(1) .stat-icon {
+        color: var(--primary);
+      }
+      .stat-card:nth-child(2) .stat-icon {
+        color: var(--success);
+      }
+      .stat-card:nth-child(3) .stat-icon {
+        color: var(--warning);
+      }
+
+      .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .stat-card:nth-child(2) .stat-number {
+        background: linear-gradient(135deg, var(--success), #059669);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .stat-card:nth-child(3) .stat-number {
+        background: linear-gradient(135deg, var(--warning), #d97706);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .stat-label {
+        color: #6b7280;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      /* Footer */
+      .main-footer {
+        text-align: center;
+        padding: 2rem 0;
+        color: #6b7280;
+        font-size: 0.9rem;
+        position: relative;
+        z-index: 10;
+      }
+
+      /* Loading Overlay */
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        backdrop-filter: blur(5px);
+      }
+
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
         }
-        
-        .card {
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border: none;
-            margin-bottom: 1rem;
+        100% {
+          transform: rotate(360deg);
         }
-        
-        .card-header {
-            background: var(--primary-gradient);
-            color: white;
-            border-radius: 10px 10px 0 0 !important;
-            padding: 1.5rem;
+      }
+
+      /* Mobile Menu Button */
+      .mobile-menu-btn {
+        display: none;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        font-size: 1.2rem;
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 1002;
+        box-shadow: var(--shadow-lg);
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 100%;
+          transform: translateX(-100%);
+          z-index: 1001;
         }
-        
-        .alert-info {
-            border-radius: 10px;
-            border: none;
-            background: var(--info-gradient);
-            color: white;
+
+        .sidebar.show {
+          transform: translateX(0);
         }
-        
-        .btn-success {
-            background: var(--success-gradient);
-            border: none;
-            border-radius: 25px;
-            padding: 10px 30px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+
+        .main-content {
+          margin-left: 0 !important;
         }
-        
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+
+        .main-header {
+          padding: 1rem 0;
         }
-        
-        .form-control {
-            border-radius: 10px;
-            border: 2px solid #e9ecef;
-            padding: 12px;
-            transition: all 0.3s ease;
-            font-size: 14px;
+
+        .header-title {
+          font-size: 1.4rem;
         }
-        
-        .form-control:focus {
-            border-color: #4facfe;
-            box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.25);
+
+        .card-body-custom {
+          padding: 1.5rem;
         }
-        
-        .badge {
-            font-size: 0.7em;
-            padding: 6px 10px;
-            border-radius: 15px;
+
+        .btn-custom-primary,
+        .btn-custom-secondary {
+          width: 100%;
+          margin-bottom: 1rem;
         }
-        
-        .stats-card {
-            transition: transform 0.3s ease;
-            border: none;
+
+        .stats-grid {
+          grid-template-columns: 1fr;
         }
-        
-        .stats-card:hover {
-            transform: translateY(-5px);
+
+        .mobile-menu-btn {
+          display: block !important;
         }
-        
-        .count-display {
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        
-        .validation-alert {
-            border-left: 4px solid #ffc107;
-        }
-        
-        .user-avatar {
-            width: 45px;
-            height: 45px;
-            object-fit: cover;
-        }
-        
-        .login-badge {
-            font-size: 0.65em;
-        }
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-dark);
+      }
     </style>
-</head>
-<body class="bg-light">
-    <div class="container-fluid py-4">
-        <!-- Header -->
-        <div class="row mb-4">
+  </head>
+  <body>
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <button class="toggle-sidebar" id="toggleSidebar">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+
+      <div class="sidebar-header">
+        <div class="sidebar-logo floating">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <h3 class="sidebar-title">SISTEM DETEKSI UJARAN KEBENCIAN</h3>
+        <p class="sidebar-subtitle">Sistem Analisis Ujaran Kebencian</p>
+      </div>
+
+      <div class="sidebar-menu">
+        <!-- DASHBOARD HARUS DI DALAM sidebar-menu -->
+        <div class="nav-item">
+          <a
+            href="{{ url_for('dashboard') }}"
+            class="nav-link {% if request.endpoint == 'dashboard' or request.endpoint == 'tambahDash' %}active{% endif %}"
+          >
+            <i class="fas fa-home"></i>
+            <span class="nav-text">Dashboard</span>
+          </a>
+        </div>
+
+        <div class="nav-item">
+          <a
+            href="{{ url_for('index') }}"
+            class="nav-link {% if request.endpoint == 'index' or request.endpoint == 'cekSentimenAnalysis' %}active{% endif %}"
+          >
+            <i class="fas fa-search"></i>
+            <span class="nav-text">Sistem Pengujian</span>
+          </a>
+        </div>
+
+        <div class="nav-item">
+          <a
+            href="{{ url_for('batch') }}"
+            class="nav-link {% if request.endpoint == 'batch' or request.endpoint == 'cekBatch' %}active{% endif %}"
+          >
+            <i class="fas fa-layer-group"></i>
+            <span class="nav-text">Unggah Berkas</span>
+          </a>
+        </div>
+
+        <div class="nav-item">
+          <a
+            href="{{ url_for('kirimData') }}"
+            class="nav-link {% if request.endpoint == 'kirimData' %}active{% endif %}"
+          >
+            <i class="fas fa-upload"></i>
+            <span class="nav-text">Kirim Data</span>
+          </a>
+        </div>
+
+        {% if session.get('logged_in') %}
+        <div class="nav-item mt-4">
+          <a href="{{ url_for('logout') }}" class="nav-link">
+            <i class="fas fa-sign-out-alt"></i>
+            <span class="nav-text">Logout</span>
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+      <div class="app-container">
+        <div class="container-fluid py-4">
+          <!-- Header -->
+          <div class="row main-header">
             <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h1 class="h3 text-primary">
-                        <i class="fas fa-language me-2"></i>Tambah Kata Slang
-                    </h1>
-                    <div class="d-flex align-items-center">
-                        <span class="text-muted me-3">Sistem Kamus Slang</span>
-                        <span class="badge bg-primary">v1.0</span>
-                    </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="logo-container">
+                  <div class="logo floating">
+                    <i class="fas fa-language"></i>
+                  </div>
+                  <div>
+                    <h1 class="header-title">Slang Dictionary</h1>
+                    <p class="header-subtitle">Kamus Bahasa Gaul Modern</p>
+                  </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Info User & Logout -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="alert alert-info d-flex justify-content-between align-items-center" id="userInfoAlert">
-                    <div class="d-flex align-items-center">
-                        <!-- User Picture -->
-                        <div id="userPictureContainer">
-                            <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3 user-avatar">
-                                <i class="fas fa-user-circle text-primary fa-lg"></i>
-                            </div>
-                        </div>
-                        <div>
-                            <!-- User Name -->
-                            <strong class="fs-6" id="userName">Pengguna</strong> 
-                            <!-- User Email -->
-                            <div class="text-white-50" style="font-size: 0.85rem;" id="userEmail">email@example.com</div>
-                            <!-- Login Type -->
-                            <div id="loginType">
-                                <span class="badge bg-light text-dark mt-1 login-badge">
-                                    <i class="fas fa-key me-1"></i> Manual Login
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Logout Button -->
-                    <a href="#" class="btn btn-sm btn-light text-danger" id="logoutBtn">
-                        <i class="fas fa-sign-out-alt me-1"></i> Logout
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Form Tambah Kata Slang -->
-        <div class="row justify-content-center">
-            <div class="col-lg-10 col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="text-center">
-                            <h5 class="card-title mb-0">
-                                <i class="fab fa-twitter me-2"></i> Tambah Kata Slang Baru
-                            </h5>
-                            <p class="mb-0 opacity-75" style="font-size: 0.9rem;">Tambahkan kata slang dan padanannya ke dalam kamus</p>
-                        </div>
-                    </div>
-                    <div class="card-body p-4">
-                        <form action="#" method="POST" id="slangForm">
-                            <!-- CSRF Token -->
-                            <input type="hidden" name="csrf_token" id="csrfToken" value="">
-                            
-                            <div class="row">
-                                <div class="col-md-6 col-sm-12 mb-4">
-                                    <label for="slang" class="form-label fw-semibold">
-                                        <i class="fas fa-comment-dots me-2"></i>Kata Slang
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <textarea name="slang" id="slang" class="form-control" 
-                                              placeholder="Contoh: gpp, bgst, wkwk, lol, brb, cmiiw, tbh, imho, btw" 
-                                              required rows="4"></textarea>
-                                    <div class="form-text text-muted mt-2">
-                                        <small>
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Pisahkan setiap kata slang dengan koma. Contoh: gpp, bgst, wkwk
-                                        </small>
-                                    </div>
-                                    <!-- Count Display -->
-                                    <div class="text-end mt-2">
-                                        <small class="text-muted count-display">
-                                            <span id="slangCount">0</span> kata slang terdeteksi
-                                        </small>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 col-sm-12 mb-4">
-                                    <label for="normal" class="form-label fw-semibold">
-                                        <i class="fas fa-language me-2"></i>Kata Normal
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <textarea name="normal" id="normal" class="form-control" 
-                                              placeholder="Contoh: tidak apa-apa, bangsat, tertawa, tertawa terbahak-bahak, sebentar lagi kembali, correct me if i'm wrong, to be honest, in my humble opinion, by the way" 
-                                              required rows="4"></textarea>
-                                    <div class="form-text text-muted mt-2">
-                                        <small>
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Pisahkan setiap kata normal dengan koma sesuai urutan kata slang.
-                                        </small>
-                                    </div>
-                                    <!-- Count Display -->
-                                    <div class="text-end mt-2">
-                                        <small class="text-muted count-display">
-                                            <span id="normalCount">0</span> kata normal terdeteksi
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Validation Info -->
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <div class="alert alert-warning validation-alert">
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
-                                            <div class="flex-grow-1">
-                                                <strong class="d-block mb-1">Perhatian:</strong>
-                                                <span>Pastikan jumlah kata slang dan kata normal sama dan sesuai urutan.</span>
-                                                <!-- Count Status -->
-                                                <div class="mt-2" id="countStatus"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-12 text-center">
-                                    <button type="submit" class="btn btn-success btn-lg px-5" id="submitBtn">
-                                        <i class="fas fa-plus-circle me-2"></i> Tambah ke Kamus
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary btn-lg ms-2" id="clearBtn">
-                                        <i class="fas fa-eraser me-2"></i> Bersihkan
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Stats -->
-        <div class="row mt-4">
-            <div class="col-md-4 mb-3">
-                <div class="card bg-primary text-white stats-card">
-                    <div class="card-body text-center py-4">
-                        <i class="fas fa-book fa-2x mb-3"></i>
-                        <h5 class="mb-2">Total Kata</h5>
-                        <h2 class="mb-0" id="totalWords">1,247</h2>
-                        <small class="opacity-75">kata dalam kamus</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card bg-success text-white stats-card">
-                    <div class="card-body text-center py-4">
-                        <i class="fas fa-plus-circle fa-2x mb-3"></i>
-                        <h5 class="mb-2">Ditambah Hari Ini</h5>
-                        <h2 class="mb-0" id="todayWords">12</h2>
-                        <small class="opacity-75">kata baru</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card bg-info text-white stats-card">
-                    <div class="card-body text-center py-4">
-                        <i class="fas fa-users fa-2x mb-3"></i>
-                        <h5 class="mb-2">Pengguna Aktif</h5>
-                        <h2 class="mb-0" id="activeUsers">156</h2>
-                        <small class="opacity-75">pengguna</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="row mt-5">
-            <div class="col-12 text-center">
-                <p class="text-muted">
-                    <small>
-                        &copy; 2024 Sistem Kamus Slang. All rights reserved. | 
-                        <i class="fas fa-code"></i> dengan <i class="fas fa-heart text-danger"></i> oleh Tim Pengembang
+                <div class="d-none d-md-flex align-items-center gap-3">
+                  <span class="text-white-50">v2.0</span>
+                  <div class="bg-white-20 rounded-pill px-3 py-1">
+                    <small class="text-white">
+                      <i class="fas fa-circle text-success me-1"></i>
+                      Online
                     </small>
-                </p>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+
+          <!-- User Info Card -->
+          <div class="row">
+            <div class="col-12">
+              <div class="user-card">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center gap-3">
+                    {% if user_picture %}
+                    <img
+                      src="{{ user_picture }}"
+                      alt="Profile"
+                      class="user-avatar"
+                    />
+                    {% else %}
+                    <div class="user-avatar">
+                      <i class="fas fa-user"></i>
+                    </div>
+                    {% endif %}
+                    <div class="user-info">
+                      <h3 class="user-name">{{ user_name }}</h3>
+                      <p class="user-email">{{ user_email }}</p>
+                      <span class="login-badge">
+                        {% if 'gmail.com' in user_email or 'google' in
+                        user_email %}
+                        <i class="fab fa-google me-1"></i> Google Login {% else
+                        %} <i class="fas fa-key me-1"></i> Manual Login {% endif
+                        %}
+                      </span>
+                    </div>
+                  </div>
+                  <a href="{{ url_for('logout') }}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Form Card -->
+          <div class="row justify-content-center">
+            <div class="col-xl-10 col-lg-12">
+              <div class="main-card">
+                <div class="card-header-custom">
+                  <div class="text-center">
+                    <h2 class="card-title">
+                      <i class="fas fa-plus-circle me-2"></i> Tambah Kata Slang
+                      Baru
+                    </h2>
+                    <p class="card-subtitle">
+                      Perkaya kamus bahasa gaul dengan kata-kata terkini
+                    </p>
+                  </div>
+                </div>
+                <div class="card-body-custom">
+                  <form
+                    action="{{ url_for('tambahDash') }}"
+                    method="POST"
+                    id="slangForm"
+                  >
+                    {{ form.csrf_token }}
+
+                    <div class="row">
+                      <div class="col-lg-6 col-md-12">
+                        <div class="form-group">
+                          <label class="form-label">
+                            <i class="fas fa-comment-dots"></i>
+                            Kata Slang
+                            <span class="text-danger">*</span>
+                          </label>
+                          <textarea
+                            name="slang"
+                            id="slang"
+                            class="form-control-custom"
+                            placeholder="Contoh: gpp, bgst, wkwk, lol, brb, cmiiw, tbh, imho, btw, otw, jjs, par, btw, afk, gg, glhf, idk, ttyl, fyi, ngl, smh, fr, cap, bet, sus, main, gas, wibu, weeb, random, ghosting, mantul, kepo, gercep, ygy, sultan, bucin, gabut, mager, julid, hemat, sayang, mahal, mantap, anjay, kepo, semangat, bismillah"
+                            required
+                            rows="6"
+                          >
+{{ oldSlang if oldSlang }}</textarea
+                          >
+                          <div class="form-text-custom">
+                            <i class="fas fa-lightbulb me-1"></i>
+                            Pisahkan setiap kata slang dengan koma. Contoh: gpp,
+                            bgst, wkwk
+                          </div>
+                          <div class="text-end mt-2">
+                            <span class="count-display">
+                              <i class="fas fa-hashtag me-1"></i>
+                              <span id="slangCount">0</span> kata slang
+                              terdeteksi
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-lg-6 col-md-12">
+                        <div class="form-group">
+                          <label class="form-label">
+                            <i class="fas fa-language"></i>
+                            Kata Normal
+                            <span class="text-danger">*</span>
+                          </label>
+                          <textarea
+                            name="normal"
+                            id="normal"
+                            class="form-control-custom"
+                            placeholder="Contoh: tidak apa-apa, bangsat, tertawa, tertawa terbahak-bahak, sebentar lagi kembali, correct me if i'm wrong, to be honest, in my humble opinion, by the way, on the way, jangan jajan sembarangan, luar biasa, by the way, away from keyboard, good game, good luck have fun, i don't know, talk to you later, for your information, not gonna lie, shaking my head, for real, bohong, benar, mencurigakan, bermain, cepat, penggemar anime, penggemar anime, acak, menghilang, mantap betul, ingin tahu, gerak cepat, ya guys ya, orang kaya, budak cinta, tidak ada kerjaan, malas gerak, iri hati, hemat, sayang, mahal, mantap, wah, ingin tahu, semangat, bismillah"
+                            required
+                            rows="6"
+                          >
+{{ oldNormal if oldNormal }}</textarea
+                          >
+                          <div class="form-text-custom">
+                            <i class="fas fa-lightbulb me-1"></i>
+                            Pisahkan setiap kata normal dengan koma sesuai
+                            urutan kata slang.
+                          </div>
+                          <div class="text-end mt-2">
+                            <span class="count-display">
+                              <i class="fas fa-hashtag me-1"></i>
+                              <span id="normalCount">0</span> kata normal
+                              terdeteksi
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Validation Alert -->
+                    <div class="row mb-4">
+                      <div class="col-12">
+                        <div class="validation-alert">
+                          <div class="d-flex align-items-center">
+                            <i
+                              class="fas fa-exclamation-triangle alert-icon me-3"
+                            ></i>
+                            <div class="flex-grow-1">
+                              <strong class="d-block mb-1"
+                                >Penting: Validasi Input</strong
+                              >
+                              <span
+                                >Pastikan jumlah kata slang dan kata normal sama
+                                dan sesuai urutan. Sistem akan mengecek
+                                otomatis.</span
+                              >
+                              <div class="mt-2" id="countStatus"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="row">
+                      <div class="col-12 text-center">
+                        <button
+                          type="submit"
+                          class="btn-custom-primary me-3"
+                          id="submitBtn"
+                        >
+                          <i class="fas fa-plus-circle me-2"></i> Tambah ke
+                          Kamus
+                        </button>
+                        <button
+                          type="button"
+                          class="btn-custom-secondary"
+                          id="clearBtn"
+                        >
+                          <i class="fas fa-eraser me-2"></i> Bersihkan Form
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Statistics -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-book-open"></i>
+              </div>
+              <h2 class="stat-number" id="totalWords">1,847</h2>
+              <p class="stat-label">Total Kata dalam Kamus</p>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <h2 class="stat-number" id="todayWords">28</h2>
+              <p class="stat-label">Ditambah Hari Ini</p>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-users"></i>
+              </div>
+              <h2 class="stat-number" id="activeUsers">2,451</h2>
+              <p class="stat-label">Pengguna Aktif</p>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="main-footer">
+            <p class="mb-2">
+              &copy; 2024 <strong>Slang Dictionary</strong>. All rights
+              reserved.
+            </p>
+            <p class="mb-0">
+              <small>
+                Dibuat dengan <i class="fas fa-heart text-danger"></i> untuk
+                melestarikan bahasa gaul Indonesia
+              </small>
+            </p>
+          </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none">
+      <div class="text-center">
+        <div class="loading-spinner mb-3"></div>
+        <h4 class="text-white">Menambahkan ke Kamus...</h4>
+        <p class="text-white-50">
+          Tunggu sebentar, sistem sedang memproses data
+        </p>
+      </div>
     </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+
     <script>
-        // Application state
-        const AppState = {
-            user: {
-                name: 'Pengguna',
-                email: 'email@example.com',
-                picture: null,
-                loginType: 'manual'
-            },
-            formData: {
-                oldSlang: '',
-                oldNormal: ''
-            },
-            stats: {
-                totalWords: 1247,
-                todayWords: 12,
-                activeUsers: 156
-            }
-        };
+      // Initialize Application
+      $(document).ready(function() {
+          console.log('🚀 Slang Dictionary Dashboard Initialized');
 
-        // Initialize application
-        $(document).ready(function(){
-            console.log('🚀 Initializing Slang Dictionary Application...');
-            
-            initializeApp();
-            setupEventListeners();
-            updateCount();
-            
-            console.log('✅ Application initialized successfully');
-        });
+          initializeApp();
+          setupEventListeners();
+          updateCount();
 
-        // Initialize application components
-        function initializeApp() {
-            // Load user data
-            loadUserData();
-            
-            // Load form data if any
-            loadFormData();
-            
-            // Update statistics
-            updateStatistics();
-            
-            // Generate CSRF token
-            generateCSRFToken();
-        }
+          console.log('✅ Dashboard initialized successfully');
+      });
 
-        // Setup event listeners
-        function setupEventListeners() {
-            // Form submission
-            $('#slangForm').on('submit', handleFormSubmit);
-            
-            // Input events
-            $('#slang, #normal').on('input', function() {
-                updateCount();
-                validateFormRealTime();
-            });
-            
-            // Clear button
-            $('#clearBtn').on('click', clearForm);
-            
-            // Format input on blur
-            $('#slang, #normal').on('blur', formatInput);
-            
-            // Logout button
-            $('#logoutBtn').on('click', handleLogout);
-        }
+      function initializeApp() {
+          // Update user interface
+          updateUserInterface();
 
-        // Load user data
-        function loadUserData() {
-            // In a real app, this would come from your backend
-            const userData = {
-                name: 'John Doe',
-                email: 'john.doe@example.com',
-                picture: null,
-                loginType: 'google'
-            };
-            
-            AppState.user = { ...AppState.user, ...userData };
-            updateUserInterface();
-        }
+          // Add floating animation to elements
+          $('.logo').addClass('floating');
+      }
 
-        // Load form data
-        function loadFormData() {
-            // In a real app, this would come from your backend session
-            const savedData = {
-                oldSlang: 'gpp, wkwk, lol',
-                oldNormal: 'tidak apa-apa, tertawa, tertawa terbahak-bahak'
-            };
-            
-            AppState.formData = { ...AppState.formData, ...savedData };
-            
-            // Populate form fields
-            if (AppState.formData.oldSlang) {
-                $('#slang').val(AppState.formData.oldSlang);
-            }
-            if (AppState.formData.oldNormal) {
-                $('#normal').val(AppState.formData.oldNormal);
-            }
-        }
+      function setupEventListeners() {
+          // Form submission - FIXED VERSION
+          $('#slangForm').on('submit', function(e) {
+              const slangText = $('#slang').val().trim();
+              const normalText = $('#normal').val().trim();
 
-        // Update user interface
-        function updateUserInterface() {
-            $('#userName').text(AppState.user.name);
-            $('#userEmail').text(AppState.user.email);
-            
-            // Update login type badge
-            const loginTypeHtml = AppState.user.loginType === 'google' 
-                ? '<span class="badge bg-light text-dark mt-1 login-badge"><i class="fab fa-google me-1"></i> Google Login</span>'
-                : '<span class="badge bg-light text-dark mt-1 login-badge"><i class="fas fa-key me-1"></i> Manual Login</span>';
-            
-            $('#loginType').html(loginTypeHtml);
-        }
+              if (!slangText || !normalText) {
+                  e.preventDefault();
+                  Swal.fire({
+                      icon: 'warning',
+                      title: 'Form tidak lengkap!',
+                      text: 'Harap isi kedua kolom kata slang dan kata normal.'
+                  });
+                  return;
+              }
 
-        // Update statistics
-        function updateStatistics() {
-            $('#totalWords').text(AppState.stats.totalWords.toLocaleString());
-            $('#todayWords').text(AppState.stats.todayWords);
-            $('#activeUsers').text(AppState.stats.activeUsers.toLocaleString());
-        }
+              const slangWords = slangText.split(',').filter(word => word.trim().length > 0);
+              const normalWords = normalText.split(',').filter(word => word.trim().length > 0);
 
-        // Generate CSRF token
-        function generateCSRFToken() {
-            const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-            $('#csrfToken').val(token);
-        }
+              if (slangWords.length !== normalWords.length) {
+                  e.preventDefault();
+                  Swal.fire({
+                      icon: 'error',
+                      title: 'Jumlah kata tidak sama!',
+                      text: `Kata slang: ${slangWords.length}, Kata normal: ${normalWords.length}. Pastikan jumlahnya sama.`
+                  });
+                  return;
+              }
 
-        // Handle form submission
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            console.log('📝 Form submission started...');
-            
-            if (!validateForm()) {
-                return false;
-            }
-            
-            // Show loading state
-            showLoadingState();
-            
-            // Simulate API call
-            setTimeout(() => {
-                handleFormSuccess();
-            }, 2000);
-        }
+              // Show loading overlay immediately
+              $('#loadingOverlay').show();
 
-        // Validate form
-        function validateForm() {
-            const slang = $('#slang').val().trim();
-            const normal = $('#normal').val().trim();
-            
-            // Check if fields are empty
-            if (!slang || !normal) {
-                showError('Harap isi kedua kolom!');
-                return false;
-            }
-            
-            // Check if number of items match
-            const slangWords = getWordsFromText(slang);
-            const normalWords = getWordsFromText(normal);
-            
-            if (slangWords.length !== normalWords.length) {
-                showWarning(
-                    'Jumlah Tidak Sesuai',
-                    `Jumlah kata slang (${slangWords.length}) dan kata normal (${normalWords.length}) tidak sama.<br>Pastikan jumlahnya sama dan sesuai urutan.`
-                );
-                return false;
-            }
-            
-            // Check for empty words
-            const emptySlang = slangWords.some(word => !word.trim());
-            const emptyNormal = normalWords.some(word => !word.trim());
-            
-            if (emptySlang || emptyNormal) {
-                showWarning('Kata Kosong Ditemukan', 'Terdapat kata yang kosong. Pastikan semua kata telah diisi dengan benar.');
-                return false;
-            }
-            
-            return true;
-        }
+              // Disable button to prevent double submission
+              $('#submitBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Memproses...');
+          });
 
-        // Real-time form validation
-        function validateFormRealTime() {
-            const slang = $('#slang').val().trim();
-            const normal = $('#normal').val().trim();
-            const slangWords = getWordsFromText(slang);
-            const normalWords = getWordsFromText(normal);
-            
-            const isValid = slangWords.length === normalWords.length && slangWords.length > 0;
-            $('#submitBtn').prop('disabled', !isValid);
-        }
+          // Real-time validation
+          $('#slang, #normal').on('input', function() {
+              updateCount();
+              validateFormRealTime();
+          });
 
-        // Update count display
-        function updateCount() {
-            const slangText = $('#slang').val();
-            const normalText = $('#normal').val();
-            
-            const slangWords = getWordsFromText(slangText);
-            const normalWords = getWordsFromText(normalText);
-            
-            const slangCount = slangWords.length;
-            const normalCount = normalWords.length;
-            
-            // Update count displays
-            $('#slangCount').text(slangCount);
-            $('#normalCount').text(normalCount);
-            
-            // Update status message
-            updateCountStatus(slangCount, normalCount);
-        }
+          // Clear button
+          $('#clearBtn').on('click', clearForm);
 
-        // Get words from text
-        function getWordsFromText(text) {
-            return text.split(',').filter(word => word.trim());
-        }
+          // Format input on blur
+          $('#slang, #normal').on('blur', formatInput);
 
-        // Update count status
-        function updateCountStatus(slangCount, normalCount) {
-            let statusHtml = '';
-            let statusClass = '';
-            
-            if (slangCount === 0 && normalCount === 0) {
-                statusHtml = '';
-            } else if (slangCount === normalCount && slangCount > 0) {
-                statusClass = 'text-success';
-                statusHtml = `<i class="fas fa-check-circle me-1"></i> Jumlah sesuai (${slangCount} pasang kata)`;
-            } else {
-                statusClass = 'text-danger';
-                statusHtml = `<i class="fas fa-exclamation-triangle me-1"></i> Jumlah tidak sesuai (Slang: ${slangCount}, Normal: ${normalCount})`;
-            }
-            
-            $('#countStatus')
-                .removeClass('text-success text-danger')
-                .addClass(statusClass)
-                .html(statusHtml);
-        }
+          // Sidebar toggle
+          $('#toggleSidebar').on('click', toggleSidebar);
 
-        // Format input
-        function formatInput() {
-            let value = $(this).val();
-            // Remove extra spaces and normalize commas
-            value = value.replace(/\s*,\s*/g, ',') // Normalize spaces around commas
-                        .replace(/,+/g, ',')       // Remove multiple commas
-                        .replace(/^,|,$/g, '')     // Remove leading/trailing commas
-                        .trim();
-            $(this).val(value);
-            updateCount();
-        }
+          // Mobile menu
+          $('#mobileMenuBtn').on('click', toggleMobileMenu);
 
-        // Clear form
-        function clearForm() {
-            Swal.fire({
-                title: 'Bersihkan Form?',
-                text: "Semua data yang telah diinput akan dihapus",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, Bersihkan!',
-                cancelButtonText: 'Batal',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $('#slang').val('');
-                    $('#normal').val('');
-                    updateCount();
-                    showSuccess('Dibersihkan!', 'Form telah berhasil dibersihkan.');
-                }
-            });
-        }
+          // Close mobile menu when clicking on a link
+          $('.nav-link').on('click', function() {
+              if ($(window).width() <= 768) {
+                  $('#sidebar').removeClass('show');
+              }
+          });
+      }
 
-        // Show loading state
-        function showLoadingState() {
-            $('#submitBtn')
-                .prop('disabled', true)
-                .html('<i class="fas fa-spinner fa-spin me-2"></i> Memproses...');
-        }
+      function toggleSidebar() {
+          const sidebar = $('#sidebar');
+          const mainContent = $('#mainContent');
+          const toggleIcon = $('#toggleSidebar i');
 
-        // Handle form success
-        function handleFormSuccess() {
-            // Reset form
-            $('#slangForm')[0].reset();
-            updateCount();
-            
-            // Show success message
-            showSuccess(
-                'Berhasil!', 
-                'Data berhasil ditambahkan ke kamus',
-                function() {
-                    // Update statistics
-                    AppState.stats.totalWords += getWordsFromText($('#slang').val()).length;
-                    AppState.stats.todayWords += getWordsFromText($('#slang').val()).length;
-                    updateStatistics();
-                    
-                    // Reset button
-                    $('#submitBtn')
-                        .prop('disabled', false)
-                        .html('<i class="fas fa-plus-circle me-2"></i> Tambah ke Kamus');
-                }
-            );
-        }
+          sidebar.toggleClass('collapsed');
+          mainContent.toggleClass('expanded');
 
-        // Handle logout
-        function handleLogout(e) {
-            e.preventDefault();
-            Swal.fire({
-                title: 'Konfirmasi Logout',
-                text: "Apakah Anda yakin ingin logout?",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, Logout!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // In a real app, this would redirect to logout endpoint
-                    showSuccess('Logout Berhasil', 'Anda telah berhasil logout.');
-                    setTimeout(() => {
-                        window.location.href = '/login';
-                    }, 2000);
-                }
-            });
-        }
+          if (sidebar.hasClass('collapsed')) {
+              toggleIcon.removeClass('fa-chevron-left').addClass('fa-chevron-right');
+          } else {
+              toggleIcon.removeClass('fa-chevron-right').addClass('fa-chevron-left');
+          }
+      }
 
-        // Utility functions for notifications
-        function showSuccess(title, text, callback = null) {
-            Swal.fire({
-                icon: 'success',
-                title: title,
-                text: text,
-                confirmButtonColor: '#3085d6',
-                confirmButtonText: 'OK',
-                timer: 3000,
-                timerProgressBar: true,
-            }).then((result) => {
-                if (callback && typeof callback === 'function') {
-                    callback();
-                }
-            });
-        }
+      function toggleMobileMenu() {
+          $('#sidebar').toggleClass('show');
+      }
 
-        function showError(text) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: text,
-                confirmButtonColor: '#d33',
-            });
-        }
+      function updateUserInterface() {
+          // Update user info if available
+          const userName = "{{ user_name }}";
+          const userEmail = "{{ user_email }}";
 
-        function showWarning(title, html) {
-            Swal.fire({
-                icon: 'warning',
-                title: title,
-                html: html,
-                confirmButtonColor: '#f39c12',
-            });
-        }
+          if (userName && userName !== 'None') {
+              $('#userName').text(userName);
+          }
+          if (userEmail && userEmail !== 'None') {
+              $('#userEmail').text(userEmail);
+          }
+      }
+
+      function updateCount() {
+          const slangText = $('#slang').val().trim();
+          const normalText = $('#normal').val().trim();
+
+          const slangCount = slangText ? slangText.split(',').filter(word => word.trim().length > 0).length : 0;
+          const normalCount = normalText ? normalText.split(',').filter(word => word.trim().length > 0).length : 0;
+
+          $('#slangCount').text(slangCount);
+          $('#normalCount').text(normalCount);
+
+          updateCountStatus(slangCount, normalCount);
+      }
+
+      function updateCountStatus(slangCount, normalCount) {
+          const countStatus = $('#countStatus');
+
+          if (slangCount === 0 && normalCount === 0) {
+              countStatus.html('<span class="text-muted">Masukkan kata slang dan kata normal</span>');
+          } else if (slangCount === normalCount) {
+              countStatus.html(`<span class="text-success"><i class="fas fa-check-circle me-1"></i> Valid! ${slangCount} kata slang dan ${normalCount} kata normal cocok</span>`);
+          } else {
+              countStatus.html(`<span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i> Jumlah tidak cocok! Slang: ${slangCount}, Normal: ${normalCount}</span>`);
+          }
+      }
+
+      function validateFormRealTime() {
+          const slangText = $('#slang').val().trim();
+          const normalText = $('#normal').val().trim();
+
+          const slangWords = slangText ? slangText.split(',').filter(word => word.trim().length > 0) : [];
+          const normalWords = normalText ? normalText.split(',').filter(word => word.trim().length > 0) : [];
+
+          if (slangWords.length !== normalWords.length && slangWords.length > 0 && normalWords.length > 0) {
+              showTemporaryAlert('warning', 'Jumlah kata tidak sama!', 'Pastikan jumlah kata slang dan kata normal sama.');
+          }
+      }
+
+      function formatInput() {
+          const $input = $(this);
+          let value = $input.val().trim();
+
+          // Remove extra spaces and format commas
+          value = value.replace(/\s*,\s*/g, ', ');
+          value = value.replace(/\s+/g, ' ');
+
+          $input.val(value);
+          updateCount();
+      }
+
+      function clearForm() {
+          Swal.fire({
+              title: 'Bersihkan Form?',
+              text: 'Semua data yang belum disimpan akan hilang.',
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#3085d6',
+              cancelButtonColor: '#d33',
+              confirmButtonText: 'Ya, Bersihkan!',
+              cancelButtonText: 'Batal'
+          }).then((result) => {
+              if (result.isConfirmed) {
+                  $('#slang').val('');
+                  $('#normal').val('');
+                  updateCount();
+                  showTemporaryAlert('success', 'Form dibersihkan!', 'Semua input telah dihapus.');
+              }
+          });
+      }
+
+      function showTemporaryAlert(icon, title, text) {
+          const Toast = Swal.mixin({
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+              didOpen: (toast) => {
+                  toast.addEventListener('mouseenter', Swal.stopTimer);
+                  toast.addEventListener('mouseleave', Swal.resumeTimer);
+              }
+          });
+
+          Toast.fire({
+              icon: icon,
+              title: title,
+              text: text
+          });
+      }
+
+      // Handle window resize
+      $(window).on('resize', function() {
+          if ($(window).width() > 768) {
+              $('#sidebar').removeClass('show');
+          }
+      });
+
+      // Success message if data was added successfully
+      {% if hasil == '1' %}
+      $(document).ready(function() {
+          // Hide loading overlay if it's still showing
+          $('#loadingOverlay').hide();
+          $('#submitBtn').prop('disabled', false).html('<i class="fas fa-plus-circle me-2"></i> Tambah ke Kamus');
+
+          Swal.fire({
+              icon: 'success',
+              title: 'Berhasil!',
+              text: 'Data berhasil ditambahkan ke kamus.',
+              confirmButtonColor: '#3b82f6'
+          });
+      });
+      {% endif %}
     </script>
-</body>
+  </body>
 </html>

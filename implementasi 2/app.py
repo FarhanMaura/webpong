@@ -175,7 +175,7 @@ def google_callback():
             session['name'] = user_info.get('name', 'User')
             session['picture'] = user_info.get('picture', '')
             logger.info(f"User {email} logged in successfully via Google")
-            return redirect(url_for('dashboard'))
+            return redirect('http://127.0.0.1:8000/dashboard-pemilihan') #
         else:
             logger.error("No email in user info")
             return redirect(url_for('login', error="Gagal mendapatkan informasi user"))
