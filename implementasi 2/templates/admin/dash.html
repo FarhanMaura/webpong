@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard - Slang Dictionary</title>
+    <title>Dashboard - Sistem Deteksi Ujaran Kebencian</title>
     <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -37,6 +37,7 @@
         --gradient-secondary: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
         --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
         --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         --gradient-glass: linear-gradient(
           135deg,
           rgba(59, 130, 246, 0.1) 0%,
@@ -350,7 +351,7 @@
       }
 
       .card-header-custom {
-        background: var(--gradient-primary);
+        background: var(--gradient-danger);
         color: white;
         padding: 2rem;
         border: none;
@@ -387,7 +388,7 @@
       }
 
       .form-label i {
-        color: var(--primary);
+        color: var(--danger);
       }
 
       .form-control-custom {
@@ -400,8 +401,8 @@
       }
 
       .form-control-custom:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        border-color: var(--danger);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
         background: white;
         transform: translateY(-2px);
       }
@@ -412,32 +413,9 @@
         margin-top: 0.5rem;
       }
 
-      .count-display {
-        font-size: 0.8rem;
-        font-weight: 600;
-        padding: 0.3rem 0.8rem;
-        border-radius: 12px;
-        background: #f3f4f6;
-        display: inline-block;
-      }
-
-      /* Validation Alert */
-      .validation-alert {
-        background: var(--gradient-glass);
-        border: 1px solid rgba(59, 130, 246, 0.2);
-        border-radius: 16px;
-        border-left: 4px solid var(--warning);
-        padding: 1.2rem;
-      }
-
-      .alert-icon {
-        font-size: 1.5rem;
-        color: var(--warning);
-      }
-
       /* Buttons */
-      .btn-custom-primary {
-        background: var(--gradient-primary);
+      .btn-custom-danger {
+        background: var(--gradient-danger);
         color: white;
         border: none;
         border-radius: 16px;
@@ -448,11 +426,11 @@
         box-shadow: var(--shadow-md);
       }
 
-      .btn-custom-primary:hover {
+      .btn-custom-danger:hover {
         transform: translateY(-3px);
         box-shadow: var(--shadow-lg);
         color: white;
-        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
       }
 
       .btn-custom-secondary {
@@ -467,8 +445,8 @@
       }
 
       .btn-custom-secondary:hover {
-        border-color: var(--primary);
-        color: var(--primary);
+        border-color: var(--danger);
+        color: var(--danger);
         transform: translateY(-2px);
       }
 
@@ -477,7 +455,7 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 1.5rem;
-        margin-top: 2rem;
+        margin-bottom: 2rem;
       }
 
       .stat-card {
@@ -516,6 +494,9 @@
       .stat-card:nth-child(3)::before {
         background: var(--gradient-warning);
       }
+      .stat-card:nth-child(4)::before {
+        background: var(--gradient-danger);
+      }
 
       .stat-icon {
         font-size: 2.5rem;
@@ -531,6 +512,9 @@
       }
       .stat-card:nth-child(3) .stat-icon {
         color: var(--warning);
+      }
+      .stat-card:nth-child(4) .stat-icon {
+        color: var(--danger);
       }
 
       .stat-number {
@@ -550,6 +534,12 @@
 
       .stat-card:nth-child(3) .stat-number {
         background: linear-gradient(135deg, var(--warning), #d97706);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .stat-card:nth-child(4) .stat-number {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
       }
@@ -589,7 +579,7 @@
         width: 50px;
         height: 50px;
         border: 5px solid #f3f3f3;
-        border-top: 5px solid #3b82f6;
+        border-top: 5px solid #ef4444;
         border-radius: 50%;
         animation: spin 1s linear infinite;
       }
@@ -617,6 +607,21 @@
         left: 1rem;
         z-index: 1002;
         box-shadow: var(--shadow-lg);
+      }
+
+      /* Info Alert */
+      .info-alert {
+        background: var(--gradient-glass);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 16px;
+        border-left: 4px solid var(--info);
+        padding: 1.2rem;
+        margin-bottom: 2rem;
+      }
+
+      .alert-icon {
+        font-size: 1.5rem;
+        color: var(--info);
       }
 
       /* Responsive Design */
@@ -647,7 +652,7 @@
           padding: 1.5rem;
         }
 
-        .btn-custom-primary,
+        .btn-custom-danger,
         .btn-custom-secondary {
           width: 100%;
           margin-bottom: 1rem;
@@ -703,42 +708,29 @@
       </div>
 
       <div class="sidebar-menu">
-        <!-- DASHBOARD HARUS DI DALAM sidebar-menu -->
         <div class="nav-item">
-          <a
-            href="{{ url_for('dashboard') }}"
-            class="nav-link {% if request.endpoint == 'dashboard' or request.endpoint == 'tambahDash' %}active{% endif %}"
-          >
+          <a href="{{ url_for('dashboard') }}" class="nav-link active">
             <i class="fas fa-home"></i>
             <span class="nav-text">Dashboard</span>
           </a>
         </div>
 
         <div class="nav-item">
-          <a
-            href="{{ url_for('index') }}"
-            class="nav-link {% if request.endpoint == 'index' or request.endpoint == 'cekSentimenAnalysis' %}active{% endif %}"
-          >
+          <a href="{{ url_for('index') }}" class="nav-link">
             <i class="fas fa-search"></i>
             <span class="nav-text">Sistem Pengujian</span>
           </a>
         </div>
 
         <div class="nav-item">
-          <a
-            href="{{ url_for('batch') }}"
-            class="nav-link {% if request.endpoint == 'batch' or request.endpoint == 'cekBatch' %}active{% endif %}"
-          >
+          <a href="{{ url_for('batch') }}" class="nav-link">
             <i class="fas fa-layer-group"></i>
             <span class="nav-text">Unggah Berkas</span>
           </a>
         </div>
 
         <div class="nav-item">
-          <a
-            href="{{ url_for('kirimData') }}"
-            class="nav-link {% if request.endpoint == 'kirimData' %}active{% endif %}"
-          >
+          <a href="{{ url_for('kirimData') }}" class="nav-link">
             <i class="fas fa-upload"></i>
             <span class="nav-text">Kirim Data</span>
           </a>
@@ -765,11 +757,13 @@
               <div class="d-flex justify-content-between align-items-center">
                 <div class="logo-container">
                   <div class="logo floating">
-                    <i class="fas fa-language"></i>
+                    <i class="fas fa-shield-alt"></i>
                   </div>
                   <div>
-                    <h1 class="header-title">Slang Dictionary</h1>
-                    <p class="header-subtitle">Kamus Bahasa Gaul Modern</p>
+                    <h1 class="header-title">Dashboard Admin</h1>
+                    <p class="header-subtitle">
+                      Sistem Deteksi Ujaran Kebencian
+                    </p>
                   </div>
                 </div>
                 <div class="d-none d-md-flex align-items-center gap-3">
@@ -822,114 +816,166 @@
             </div>
           </div>
 
+          <!-- Statistics -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-ban"></i>
+              </div>
+              <h2 class="stat-number">{{ total_hate_keywords }}</h2>
+              <p class="stat-label">Total Kata Ujaran Kebencian</p>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-user-slash"></i>
+              </div>
+              <h2 class="stat-number">{{ abusive_count }}</h2>
+              <p class="stat-label">Kata Abusive</p>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-users-slash"></i>
+              </div>
+              <h2 class="stat-number">{{ racial_count }}</h2>
+              <p class="stat-label">Kata Rasial</p>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-church"></i>
+              </div>
+              <h2 class="stat-number">{{ religious_count }}</h2>
+              <p class="stat-label">Kata Agama</p>
+            </div>
+          </div>
+
+          <!-- Info Alert -->
+          <div class="row">
+            <div class="col-12">
+              <div class="info-alert">
+                <div class="d-flex align-items-center">
+                  <i class="fas fa-info-circle alert-icon me-3"></i>
+                  <div class="flex-grow-1">
+                    <strong class="d-block mb-1">Cara Kerja Sistem</strong>
+                    <span
+                      >Tambahkan kata-kata ujaran kebencian ke database. Setelah
+                      ditambahkan, sistem akan langsung mendeteksi kata tersebut
+                      sebagai ujaran kebencian ketika di-test.</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Main Form Card -->
           <div class="row justify-content-center">
-            <div class="col-xl-10 col-lg-12">
+            <div class="col-xl-8 col-lg-10">
               <div class="main-card">
                 <div class="card-header-custom">
                   <div class="text-center">
                     <h2 class="card-title">
-                      <i class="fas fa-plus-circle me-2"></i> Tambah Kata Slang
-                      Baru
+                      <i class="fas fa-ban me-2"></i> Tambah Kata Ujaran
+                      Kebencian
                     </h2>
                     <p class="card-subtitle">
-                      Perkaya kamus bahasa gaul dengan kata-kata terkini
+                      Tambahkan kata-kata yang termasuk ujaran kebencian ke
+                      database
                     </p>
                   </div>
                 </div>
                 <div class="card-body-custom">
                   <form
-                    action="{{ url_for('tambahDash') }}"
+                    action="{{ url_for('tambahHateSpeech') }}"
                     method="POST"
-                    id="slangForm"
+                    id="hateSpeechForm"
                   >
                     {{ form.csrf_token }}
 
                     <div class="row">
-                      <div class="col-lg-6 col-md-12">
+                      <div class="col-12">
                         <div class="form-group">
                           <label class="form-label">
-                            <i class="fas fa-comment-dots"></i>
-                            Kata Slang
+                            <i class="fas fa-font"></i>
+                            Kata Ujaran Kebencian
                             <span class="text-danger">*</span>
                           </label>
-                          <textarea
-                            name="slang"
-                            id="slang"
+                          <input
+                            type="text"
+                            name="keyword"
+                            id="keyword"
                             class="form-control-custom"
-                            placeholder="Contoh: gpp, bgst, wkwk, lol, brb, cmiiw, tbh, imho, btw, otw, jjs, par, btw, afk, gg, glhf, idk, ttyl, fyi, ngl, smh, fr, cap, bet, sus, main, gas, wibu, weeb, random, ghosting, mantul, kepo, gercep, ygy, sultan, bucin, gabut, mager, julid, hemat, sayang, mahal, mantap, anjay, kepo, semangat, bismillah"
+                            placeholder="Contoh: sayang, babi, kontol, bangsat, kafir, cina, dll."
                             required
-                            rows="6"
-                          >
-{{ oldSlang if oldSlang }}</textarea
-                          >
+                          />
                           <div class="form-text-custom">
                             <i class="fas fa-lightbulb me-1"></i>
-                            Pisahkan setiap kata slang dengan koma. Contoh: gpp,
-                            bgst, wkwk
-                          </div>
-                          <div class="text-end mt-2">
-                            <span class="count-display">
-                              <i class="fas fa-hashtag me-1"></i>
-                              <span id="slangCount">0</span> kata slang
-                              terdeteksi
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-lg-6 col-md-12">
-                        <div class="form-group">
-                          <label class="form-label">
-                            <i class="fas fa-language"></i>
-                            Kata Normal
-                            <span class="text-danger">*</span>
-                          </label>
-                          <textarea
-                            name="normal"
-                            id="normal"
-                            class="form-control-custom"
-                            placeholder="Contoh: tidak apa-apa, bangsat, tertawa, tertawa terbahak-bahak, sebentar lagi kembali, correct me if i'm wrong, to be honest, in my humble opinion, by the way, on the way, jangan jajan sembarangan, luar biasa, by the way, away from keyboard, good game, good luck have fun, i don't know, talk to you later, for your information, not gonna lie, shaking my head, for real, bohong, benar, mencurigakan, bermain, cepat, penggemar anime, penggemar anime, acak, menghilang, mantap betul, ingin tahu, gerak cepat, ya guys ya, orang kaya, budak cinta, tidak ada kerjaan, malas gerak, iri hati, hemat, sayang, mahal, mantap, wah, ingin tahu, semangat, bismillah"
-                            required
-                            rows="6"
-                          >
-{{ oldNormal if oldNormal }}</textarea
-                          >
-                          <div class="form-text-custom">
-                            <i class="fas fa-lightbulb me-1"></i>
-                            Pisahkan setiap kata normal dengan koma sesuai
-                            urutan kata slang.
-                          </div>
-                          <div class="text-end mt-2">
-                            <span class="count-display">
-                              <i class="fas fa-hashtag me-1"></i>
-                              <span id="normalCount">0</span> kata normal
-                              terdeteksi
-                            </span>
+                            Masukkan satu kata ujaran kebencian. Contoh:
+                            "sayang" akan dideteksi sebagai kata abusive.
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <!-- Validation Alert -->
-                    <div class="row mb-4">
-                      <div class="col-12">
-                        <div class="validation-alert">
-                          <div class="d-flex align-items-center">
-                            <i
-                              class="fas fa-exclamation-triangle alert-icon me-3"
-                            ></i>
-                            <div class="flex-grow-1">
-                              <strong class="d-block mb-1"
-                                >Penting: Validasi Input</strong
-                              >
-                              <span
-                                >Pastikan jumlah kata slang dan kata normal sama
-                                dan sesuai urutan. Sistem akan mengecek
-                                otomatis.</span
-                              >
-                              <div class="mt-2" id="countStatus"></div>
-                            </div>
-                          </div>
+                    <div class="row">
+                      <div class="col-md-4">
+                        <div class="form-group">
+                          <label class="form-label">
+                            <i class="fas fa-tag"></i>
+                            Kategori
+                            <span class="text-danger">*</span>
+                          </label>
+                          <select
+                            name="category"
+                            id="category"
+                            class="form-control-custom"
+                            required
+                          >
+                            <option value="">Pilih Kategori</option>
+                            <option value="abusive">
+                              Abusive (Kata Kasar)
+                            </option>
+                            <option value="racial">Rasial</option>
+                            <option value="religious">Agama</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="form-group">
+                          <label class="form-label">
+                            <i class="fas fa-bolt"></i>
+                            Intensitas
+                            <span class="text-danger">*</span>
+                          </label>
+                          <select
+                            name="intensity"
+                            id="intensity"
+                            class="form-control-custom"
+                            required
+                          >
+                            <option value="">Pilih Intensitas</option>
+                            <option value="weak">Lemah</option>
+                            <option value="moderate">Sedang</option>
+                            <option value="strong">Kuat</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="form-group">
+                          <label class="form-label">
+                            <i class="fas fa-bullseye"></i>
+                            Target
+                            <span class="text-danger">*</span>
+                          </label>
+                          <select
+                            name="target"
+                            id="target"
+                            class="form-control-custom"
+                            required
+                          >
+                            <option value="">Pilih Target</option>
+                            <option value="individual">Individu</option>
+                            <option value="group">Grup/Kelompok</option>
+                          </select>
                         </div>
                       </div>
                     </div>
@@ -939,16 +985,15 @@
                       <div class="col-12 text-center">
                         <button
                           type="submit"
-                          class="btn-custom-primary me-3"
-                          id="submitBtn"
+                          class="btn-custom-danger me-3"
+                          id="submitHateSpeechBtn"
                         >
-                          <i class="fas fa-plus-circle me-2"></i> Tambah ke
-                          Kamus
+                          <i class="fas fa-ban me-2"></i> Tambah ke Database
                         </button>
                         <button
                           type="button"
                           class="btn-custom-secondary"
-                          id="clearBtn"
+                          id="clearHateSpeechBtn"
                         >
                           <i class="fas fa-eraser me-2"></i> Bersihkan Form
                         </button>
@@ -960,41 +1005,16 @@
             </div>
           </div>
 
-          <!-- Statistics -->
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-book-open"></i>
-              </div>
-              <h2 class="stat-number" id="totalWords">1,847</h2>
-              <p class="stat-label">Total Kata dalam Kamus</p>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-chart-line"></i>
-              </div>
-              <h2 class="stat-number" id="todayWords">28</h2>
-              <p class="stat-label">Ditambah Hari Ini</p>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-users"></i>
-              </div>
-              <h2 class="stat-number" id="activeUsers">2,451</h2>
-              <p class="stat-label">Pengguna Aktif</p>
-            </div>
-          </div>
-
           <!-- Footer -->
           <div class="main-footer">
             <p class="mb-2">
-              &copy; 2024 <strong>Slang Dictionary</strong>. All rights
-              reserved.
+              &copy; 2024 <strong>Sistem Deteksi Ujaran Kebencian</strong>. All
+              rights reserved.
             </p>
             <p class="mb-0">
               <small>
                 Dibuat dengan <i class="fas fa-heart text-danger"></i> untuk
-                melestarikan bahasa gaul Indonesia
+                mendeteksi ujaran kebencian
               </small>
             </p>
           </div>
@@ -1006,7 +1026,7 @@
     <div class="loading-overlay" id="loadingOverlay" style="display: none">
       <div class="text-center">
         <div class="loading-spinner mb-3"></div>
-        <h4 class="text-white">Menambahkan ke Kamus...</h4>
+        <h4 class="text-white">Memproses Data...</h4>
         <p class="text-white-50">
           Tunggu sebentar, sistem sedang memproses data
         </p>
@@ -1021,12 +1041,9 @@
     <script>
       // Initialize Application
       $(document).ready(function() {
-          console.log('🚀 Slang Dictionary Dashboard Initialized');
-
+          console.log('🚀 Dashboard Admin Initialized');
           initializeApp();
           setupEventListeners();
-          updateCount();
-
           console.log('✅ Dashboard initialized successfully');
       });
 
@@ -1039,30 +1056,19 @@
       }
 
       function setupEventListeners() {
-          // Form submission - FIXED VERSION
-          $('#slangForm').on('submit', function(e) {
-              const slangText = $('#slang').val().trim();
-              const normalText = $('#normal').val().trim();
+          // Hate Speech Form submission
+          $('#hateSpeechForm').on('submit', function(e) {
+              const keyword = $('#keyword').val().trim();
+              const category = $('#category').val();
+              const intensity = $('#intensity').val();
+              const target = $('#target').val();
 
-              if (!slangText || !normalText) {
+              if (!keyword || !category || !intensity || !target) {
                   e.preventDefault();
                   Swal.fire({
                       icon: 'warning',
                       title: 'Form tidak lengkap!',
-                      text: 'Harap isi kedua kolom kata slang dan kata normal.'
-                  });
-                  return;
-              }
-
-              const slangWords = slangText.split(',').filter(word => word.trim().length > 0);
-              const normalWords = normalText.split(',').filter(word => word.trim().length > 0);
-
-              if (slangWords.length !== normalWords.length) {
-                  e.preventDefault();
-                  Swal.fire({
-                      icon: 'error',
-                      title: 'Jumlah kata tidak sama!',
-                      text: `Kata slang: ${slangWords.length}, Kata normal: ${normalWords.length}. Pastikan jumlahnya sama.`
+                      text: 'Harap isi semua field yang diperlukan.'
                   });
                   return;
               }
@@ -1071,20 +1077,11 @@
               $('#loadingOverlay').show();
 
               // Disable button to prevent double submission
-              $('#submitBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Memproses...');
-          });
-
-          // Real-time validation
-          $('#slang, #normal').on('input', function() {
-              updateCount();
-              validateFormRealTime();
+              $('#submitHateSpeechBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Memproses...');
           });
 
           // Clear button
-          $('#clearBtn').on('click', clearForm);
-
-          // Format input on blur
-          $('#slang, #normal').on('blur', formatInput);
+          $('#clearHateSpeechBtn').on('click', clearHateSpeechForm);
 
           // Sidebar toggle
           $('#toggleSidebar').on('click', toggleSidebar);
@@ -1132,56 +1129,7 @@
           }
       }
 
-      function updateCount() {
-          const slangText = $('#slang').val().trim();
-          const normalText = $('#normal').val().trim();
-
-          const slangCount = slangText ? slangText.split(',').filter(word => word.trim().length > 0).length : 0;
-          const normalCount = normalText ? normalText.split(',').filter(word => word.trim().length > 0).length : 0;
-
-          $('#slangCount').text(slangCount);
-          $('#normalCount').text(normalCount);
-
-          updateCountStatus(slangCount, normalCount);
-      }
-
-      function updateCountStatus(slangCount, normalCount) {
-          const countStatus = $('#countStatus');
-
-          if (slangCount === 0 && normalCount === 0) {
-              countStatus.html('<span class="text-muted">Masukkan kata slang dan kata normal</span>');
-          } else if (slangCount === normalCount) {
-              countStatus.html(`<span class="text-success"><i class="fas fa-check-circle me-1"></i> Valid! ${slangCount} kata slang dan ${normalCount} kata normal cocok</span>`);
-          } else {
-              countStatus.html(`<span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i> Jumlah tidak cocok! Slang: ${slangCount}, Normal: ${normalCount}</span>`);
-          }
-      }
-
-      function validateFormRealTime() {
-          const slangText = $('#slang').val().trim();
-          const normalText = $('#normal').val().trim();
-
-          const slangWords = slangText ? slangText.split(',').filter(word => word.trim().length > 0) : [];
-          const normalWords = normalText ? normalText.split(',').filter(word => word.trim().length > 0) : [];
-
-          if (slangWords.length !== normalWords.length && slangWords.length > 0 && normalWords.length > 0) {
-              showTemporaryAlert('warning', 'Jumlah kata tidak sama!', 'Pastikan jumlah kata slang dan kata normal sama.');
-          }
-      }
-
-      function formatInput() {
-          const $input = $(this);
-          let value = $input.val().trim();
-
-          // Remove extra spaces and format commas
-          value = value.replace(/\s*,\s*/g, ', ');
-          value = value.replace(/\s+/g, ' ');
-
-          $input.val(value);
-          updateCount();
-      }
-
-      function clearForm() {
+      function clearHateSpeechForm() {
           Swal.fire({
               title: 'Bersihkan Form?',
               text: 'Semua data yang belum disimpan akan hilang.',
@@ -1193,9 +1141,10 @@
               cancelButtonText: 'Batal'
           }).then((result) => {
               if (result.isConfirmed) {
-                  $('#slang').val('');
-                  $('#normal').val('');
-                  updateCount();
+                  $('#keyword').val('');
+                  $('#category').val('');
+                  $('#intensity').val('');
+                  $('#target').val('');
                   showTemporaryAlert('success', 'Form dibersihkan!', 'Semua input telah dihapus.');
               }
           });
@@ -1229,17 +1178,17 @@
       });
 
       // Success message if data was added successfully
-      {% if hasil == '1' %}
+      {% if hasil == '2' %}
       $(document).ready(function() {
           // Hide loading overlay if it's still showing
           $('#loadingOverlay').hide();
-          $('#submitBtn').prop('disabled', false).html('<i class="fas fa-plus-circle me-2"></i> Tambah ke Kamus');
+          $('#submitHateSpeechBtn').prop('disabled', false).html('<i class="fas fa-ban me-2"></i> Tambah ke Database');
 
           Swal.fire({
               icon: 'success',
               title: 'Berhasil!',
-              text: 'Data berhasil ditambahkan ke kamus.',
-              confirmButtonColor: '#3b82f6'
+              text: 'Kata ujaran kebencian berhasil ditambahkan ke database.',
+              confirmButtonColor: '#ef4444'
           });
       });
       {% endif %}

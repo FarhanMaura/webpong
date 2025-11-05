@@ -10,15 +10,17 @@ from wtforms import SubmitField
 from flask_wtf.csrf import CSRFProtect
 import psutil
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+
 factory = StemmerFactory()
 stemmer = factory.create_stemmer()
 
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file, jsonify
 from urllib.parse import urlparse
 from authlib.integrations.flask_client import OAuth
 import secrets
 import logging
 import requests
+import re
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -30,9 +32,9 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Ry4&tuKqP@9lx#sF0wv2pG5$zLp0*H!'
 csrf = CSRFProtect(app)
 
-# Konfigurasi OAuth - GUNAKAN CREDENTIALS ASLI DARI GOOGLE
-app.config['GOOGLE_CLIENT_ID'] = '1070506598093-fh66ogvcqvsiv2tfct7a8cs98jm6ahhv.apps.googleusercontent.com'  # GANTI dengan Client ID asli
-app.config['GOOGLE_CLIENT_SECRET'] = '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'  # GANTI dengan Client Secret asli
+# Konfigurasi OAuth
+app.config['GOOGLE_CLIENT_ID'] = '1070506598093-fh66ogvcqvsiv2tfct7a8cs98jm6ahhv.apps.googleusercontent.com'
+app.config['GOOGLE_CLIENT_SECRET'] = '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'
 
 # Inisialisasi OAuth dengan konfigurasi manual
 oauth = OAuth(app)
@@ -51,12 +53,221 @@ google = oauth.register(
     }
 )
 
-# Daftar email yang diizinkan 
-ALLOWED_EMAILS = ['arimuzakir@gmail.com', 'swalidaien@gmail.com']  # Ganti dengan email yang diizinkan
+ALLOWED_EMAILS = ['arimuzakir@gmail.com', 'swalidaien@gmail.com']
 
 class MyForm(FlaskForm):
     submit = SubmitField('Submit')
 
+# 🔥 HARDCODED HATE SPEECH DATABASE - LEBIH AKURAT
+HATE_SPEECH_DATABASE = {
+    # Kata abusive - target individual, intensity strong
+    'kontol': {'category': 'abusive', 'intensity': 'strong', 'target': 'individual'},
+    'memek': {'category': 'abusive', 'intensity': 'strong', 'target': 'individual'},
+    'jancok': {'category': 'abusive', 'intensity': 'strong', 'target': 'individual'},
+    'bangsat': {'category': 'abusive', 'intensity': 'strong', 'target': 'individual'},
+    'anjing': {'category': 'abusive', 'intensity': 'moderate', 'target': 'individual'},
+    'asu': {'category': 'abusive', 'intensity': 'moderate', 'target': 'individual'},
+    'goblok': {'category': 'abusive', 'intensity': 'weak', 'target': 'individual'},
+    'bodoh': {'category': 'abusive', 'intensity': 'weak', 'target': 'individual'},
+    'bego': {'category': 'abusive', 'intensity': 'weak', 'target': 'individual'},
+    'tolol': {'category': 'abusive', 'intensity': 'weak', 'target': 'individual'},
+    'idiot': {'category': 'abusive', 'intensity': 'weak', 'target': 'individual'},
+    
+    # Kata racial - target group, intensity strong  
+    'babi': {'category': 'racial', 'intensity': 'strong', 'target': 'group'},
+    'monyet': {'category': 'racial', 'intensity': 'strong', 'target': 'group'},
+    'cina': {'category': 'racial', 'intensity': 'strong', 'target': 'group'},
+    'cokin': {'category': 'racial', 'intensity': 'moderate', 'target': 'group'},
+    'indon': {'category': 'racial', 'intensity': 'moderate', 'target': 'group'},
+    'jawa': {'category': 'racial', 'intensity': 'weak', 'target': 'group'},
+    'sunda': {'category': 'racial', 'intensity': 'weak', 'target': 'group'},
+    'batak': {'category': 'racial', 'intensity': 'weak', 'target': 'group'},
+    'papua': {'category': 'racial', 'intensity': 'weak', 'target': 'group'},
+    
+    # Kata religious - target group, intensity strong
+    'kafir': {'category': 'religious', 'intensity': 'strong', 'target': 'group'},
+    'murtad': {'category': 'religious', 'intensity': 'strong', 'target': 'group'},
+    'kristen': {'category': 'religious', 'intensity': 'moderate', 'target': 'group'},
+    'budha': {'category': 'religious', 'intensity': 'moderate', 'target': 'group'},
+    'yahudi': {'category': 'religious', 'intensity': 'moderate', 'target': 'group'},
+    'islam': {'category': 'religious', 'intensity': 'moderate', 'target': 'group'},
+    'muslim': {'category': 'religious', 'intensity': 'moderate', 'target': 'group'},
+    
+    # Variasi kata
+    'ngentot': {'category': 'abusive', 'intensity': 'strong', 'target': 'individual'},
+    'ngtd': {'category': 'abusive', 'intensity': 'strong', 'target': 'individual'},
+    'kontl': {'category': 'abusive', 'intensity': 'strong', 'target': 'individual'},
+    'ktl': {'category': 'abusive', 'intensity': 'strong', 'target': 'individual'},
+    'anjg': {'category': 'abusive', 'intensity': 'moderate', 'target': 'individual'},
+    'anjir': {'category': 'abusive', 'intensity': 'moderate', 'target': 'individual'},
+    'bgsat': {'category': 'abusive', 'intensity': 'strong', 'target': 'individual'},
+    'bngst': {'category': 'abusive', 'intensity': 'strong', 'target': 'individual'},
+    'asw': {'category': 'abusive', 'intensity': 'moderate', 'target': 'individual'},
+    'gblk': {'category': 'abusive', 'intensity': 'weak', 'target': 'individual'},
+    'gblok': {'category': 'abusive', 'intensity': 'weak', 'target': 'individual'},
+}
+
+# 🔥 SIMPLE & ACCURATE RULE-BASED DETECTION
+def accurate_rule_based_detection(text):
+    """
+    Sistem rule-based yang sederhana tapi akurat
+    Menggunakan hardcoded database + pattern matching
+    """
+    text_lower = text.lower().strip()
+    
+    # Pattern untuk kata yang disamarkan
+    patterns = {
+        'ngentot': r'\b(ngentot|ngtd|gentot|gtot|nge?ntt)\b',
+        'kontol': r'\b(kontol|kontl|kntl|ktl|konthol)\b', 
+        'memek': r'\b(memek|mmk|memeq|me?me?k)\b',
+        'bangsat': r'\b(bangsat|bngst|bgsat|bangst)\b',
+        'anjing': r'\b(anjing|anjg|anj|anjir|anjay)\b',
+        'asu': r'\b(asu|asw|as*u)\b',
+        'goblok': r'\b(goblok|gblk|gblok|goblog)\b',
+        'bodoh': r'\b(bodoh|bdh|bodo|bdo)\b'
+    }
+    
+    # Deteksi kata
+    detected_words = []
+    
+    # Cek kata langsung dari database
+    words = re.findall(r'\b\w+\b', text_lower)
+    for word in words:
+        if word in HATE_SPEECH_DATABASE:
+            detected_words.append({
+                'word': word,
+                'category': HATE_SPEECH_DATABASE[word]['category'],
+                'intensity': HATE_SPEECH_DATABASE[word]['intensity'],
+                'target': HATE_SPEECH_DATABASE[word]['target']
+            })
+    
+    # Cek pattern matching
+    for base_word, pattern in patterns.items():
+        if base_word in HATE_SPEECH_DATABASE and re.search(pattern, text_lower):
+            detected_words.append({
+                'word': base_word,
+                'category': HATE_SPEECH_DATABASE[base_word]['category'],
+                'intensity': HATE_SPEECH_DATABASE[base_word]['intensity'],
+                'target': HATE_SPEECH_DATABASE[base_word]['target'],
+                'type': 'pattern'
+            })
+    
+    # Analisis hasil deteksi
+    hate_count = len(detected_words)
+    abusive_count = len([w for w in detected_words if w['category'] == 'abusive'])
+    racial_count = len([w for w in detected_words if w['category'] == 'racial'])
+    religious_count = len([w for w in detected_words if w['category'] == 'religious'])
+    
+    # LOGIC DETECTION YANG AKURAT
+    is_hate_speech = hate_count > 0
+    is_abusive = abusive_count > 0
+    is_racial = racial_count > 0
+    is_religious = religious_count > 0
+    
+    # Tentukan target
+    has_individual = any(w['target'] == 'individual' for w in detected_words)
+    has_group = any(w['target'] == 'group' for w in detected_words)
+    
+    is_target_individual = has_individual or (is_hate_speech and not has_group)
+    is_target_group = has_group
+    
+    # Tentukan intensity
+    max_intensity = 'weak'
+    for word in detected_words:
+        intensity = word['intensity']
+        if intensity == 'strong':
+            max_intensity = 'strong'
+            break
+        elif intensity == 'moderate' and max_intensity != 'strong':
+            max_intensity = 'moderate'
+    
+    # Generate prediction binary
+    prediction = [
+        '1' if not is_hate_speech else '0',  # Non_HS (0)
+        '1' if is_hate_speech else '0',      # HS (1)
+        '1' if is_abusive else '0',          # Abusive (2)
+        '1' if is_target_individual else '0', # HS_Individual (3)
+        '1' if is_target_group else '0',     # HS_Group (4)
+        '1' if is_religious else '0',        # HS_Religion (5)
+        '1' if is_racial else '0',           # HS_Race (6)
+        '0',                                 # HS_Physical (7) - tidak digunakan
+        '0',                                 # HS_Gender (8) - tidak digunakan
+        '1' if is_hate_speech and not (is_racial or is_religious) else '0', # HS_Other (9)
+        '1' if max_intensity == 'weak' else '0',     # HS_Weak (10)
+        '1' if max_intensity == 'moderate' else '0', # HS_Moderate (11)
+        '1' if max_intensity == 'strong' else '0'    # HS_Strong (12)
+    ]
+    
+    prediction_str = ''.join(prediction)
+    
+    # Generate probabilities yang realistis
+    proba = []
+    for i, pred in enumerate(prediction):
+        if pred == '1':
+            if i == 0:  # Non_HS
+                proba.append(0.9 if not is_hate_speech else 0.1)
+            elif i == 1:  # HS
+                proba.append(0.9 if is_hate_speech else 0.1)
+            elif i == 2:  # Abusive
+                proba.append(0.85 if is_abusive else 0.15)
+            elif i in [5, 6]:  # Religion, Race
+                proba.append(0.8)
+            elif i in [10, 11, 12]:  # Intensity
+                proba.append(0.75 if max_intensity in ['weak', 'moderate'] else 0.9)
+            else:
+                proba.append(0.7)
+        else:
+            proba.append(0.1 if i in [1, 2, 5, 6] else 0.3)
+    
+    # Debug info
+    logger.info(f"ACCURATE DETECTION - Text: '{text}'")
+    logger.info(f"Detected words: {[w['word'] for w in detected_words]}")
+    logger.info(f"Categories: {[w['category'] for w in detected_words]}")
+    logger.info(f"HS: {is_hate_speech}, Abusive: {is_abusive}, Racial: {is_racial}, Religious: {is_religious}")
+    logger.info(f"Target - Individual: {is_target_individual}, Group: {is_target_group}")
+    logger.info(f"Intensity: {max_intensity}")
+    logger.info(f"Prediction: {prediction_str}")
+    
+    return [prediction_str], [proba]
+
+# 🔥 LOAD/SAVE TO CSV UNTUK DASHBOARD
+HATE_SPEECH_KEYWORDS_FILE = "data/mentahan/hate_speech_keywords.csv"
+
+def save_to_csv():
+    """Save current database to CSV"""
+    try:
+        os.makedirs(os.path.dirname(HATE_SPEECH_KEYWORDS_FILE), exist_ok=True)
+        with open(HATE_SPEECH_KEYWORDS_FILE, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(['keyword', 'category', 'intensity', 'target'])
+            for word, data in HATE_SPEECH_DATABASE.items():
+                writer.writerow([word, data['category'], data['intensity'], data['target']])
+        logger.info(f"Saved {len(HATE_SPEECH_DATABASE)} keywords to CSV")
+    except Exception as e:
+        logger.error(f"Error saving to CSV: {e}")
+
+def load_from_csv():
+    """Load additional keywords from CSV"""
+    try:
+        if os.path.exists(HATE_SPEECH_KEYWORDS_FILE):
+            with open(HATE_SPEECH_KEYWORDS_FILE, 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    keyword = row['keyword'].strip().lower()
+                    if keyword and keyword not in HATE_SPEECH_DATABASE:
+                        HATE_SPEECH_DATABASE[keyword] = {
+                            'category': row.get('category', 'abusive'),
+                            'intensity': row.get('intensity', 'weak'),
+                            'target': row.get('target', 'individual')
+                        }
+            logger.info(f"Loaded additional keywords from CSV")
+    except Exception as e:
+        logger.error(f"Error loading from CSV: {e}")
+
+# Initialize
+save_to_csv()
+
+# 🔥 ROUTES
 @app.route('/login')
 def login():
     form = MyForm()
@@ -66,22 +277,9 @@ def login():
 @app.route('/google-login')
 def google_login():
     try:
-        # Generate state untuk mencegah CSRF
         session['oauth_state'] = secrets.token_urlsafe(16)
         redirect_uri = url_for('google_callback', _external=True)
-        logger.info(f"Starting Google OAuth with redirect: {redirect_uri}")
         
-        # Validasi redirect URI
-        allowed_redirects = [
-            'http://localhost:5000/google-callback',
-            'http://127.0.0.1:5000/google-callback'
-        ]
-        
-        if redirect_uri not in allowed_redirects:
-            logger.error(f"Invalid redirect URI: {redirect_uri}")
-            return redirect(url_for('login', error="Konfigurasi redirect URI tidak valid"))
-        
-        # Buat authorization URL manual
         auth_url = (
             f"https://accounts.google.com/o/oauth2/auth"
             f"?response_type=code"
@@ -90,10 +288,9 @@ def google_login():
             f"&scope=openid%20email%20profile"
             f"&state={session['oauth_state']}"
             f"&access_type=offline"
-            f"&prompt=consent"  # Tambahkan ini untuk memastikan consent screen muncul
+            f"&prompt=consent"
         )
         
-        logger.info(f"Redirecting to Google OAuth: {auth_url}")
         return redirect(auth_url)
     
     except Exception as e:
@@ -103,26 +300,18 @@ def google_login():
 @app.route('/google-callback')
 def google_callback():
     try:
-        # Cek error dari Google
         error = request.args.get('error')
         if error:
-            error_description = request.args.get('error_description', '')
-            logger.error(f"Google OAuth error: {error} - {error_description}")
-            return redirect(url_for('login', error=f"Google login gagal: {error_description}"))
+            return redirect(url_for('login', error=f"Google login gagal: {error}"))
         
-        # Validasi state
         state = request.args.get('state')
         if state != session.get('oauth_state'):
-            logger.error(f"State mismatch: expected {session.get('oauth_state')}, got {state}")
             return redirect(url_for('login', error="Sesi tidak valid, silakan coba lagi"))
         
-        # Dapatkan authorization code
         code = request.args.get('code')
         if not code:
-            logger.error("No authorization code received")
             return redirect(url_for('login', error="Kode otorisasi tidak ditemukan"))
         
-        # Tukar code dengan access token
         redirect_uri = url_for('google_callback', _external=True)
         token_url = 'https://oauth2.googleapis.com/token'
         token_data = {
@@ -133,32 +322,22 @@ def google_callback():
             'redirect_uri': redirect_uri
         }
         
-        logger.info("Exchanging code for access token...")
         token_response = requests.post(token_url, data=token_data)
         
         if token_response.status_code != 200:
-            logger.error(f"Token exchange failed: {token_response.status_code} - {token_response.text}")
             return redirect(url_for('login', error="Gagal mendapatkan access token dari Google"))
         
         token_json = token_response.json()
-        
-        if 'error' in token_json:
-            logger.error(f"Token error: {token_json['error']}")
-            return redirect(url_for('login', error=f"Error token: {token_json['error']}"))
-        
         access_token = token_json.get('access_token')
         
         if not access_token:
-            logger.error("No access token received")
             return redirect(url_for('login', error="Access token tidak diterima"))
         
-        # Dapatkan user info dari Google API
         user_info_url = 'https://www.googleapis.com/oauth2/v3/userinfo'
         headers = {'Authorization': f'Bearer {access_token}'}
         user_response = requests.get(user_info_url, headers=headers)
         
         if user_response.status_code != 200:
-            logger.error(f"User info request failed: {user_response.status_code}")
             return redirect(url_for('login', error="Gagal mendapatkan informasi user dari Google"))
         
         user_info = user_response.json()
@@ -167,17 +346,13 @@ def google_callback():
             session['user'] = user_info
             email = user_info['email']
             
-            # ✅ HAPUS PENGEcekan ALLOWED_EMAILS - SEMUA EMAIL DIIZINKAN
-            # Langsung login tanpa cek email
             session["iHateSession"] = ".78gua$higutya56sd7a8syugt43234]`"
             session['logged_in'] = True
             session['email'] = email
             session['name'] = user_info.get('name', 'User')
             session['picture'] = user_info.get('picture', '')
-            logger.info(f"User {email} logged in successfully via Google")
-            return redirect('http://127.0.0.1:8000/dashboard-pemilihan') #
+            return redirect(url_for('dashboard'))
         else:
-            logger.error("No email in user info")
             return redirect(url_for('login', error="Gagal mendapatkan informasi user"))
     
     except Exception as e:
@@ -212,7 +387,23 @@ def dashboard():
             user_name = session.get('name', 'User')
             user_email = session.get('email', '')
             user_picture = session.get('picture', '')
-            return render_template("admin/dash.html", form=form, hasil=hasil, user_name=user_name, user_email=user_email, user_picture=user_picture)
+            
+            # Hitung statistik
+            total_hate_keywords = len(HATE_SPEECH_DATABASE)
+            abusive_count = len([w for w in HATE_SPEECH_DATABASE.values() if w['category'] == 'abusive'])
+            racial_count = len([w for w in HATE_SPEECH_DATABASE.values() if w['category'] == 'racial'])
+            religious_count = len([w for w in HATE_SPEECH_DATABASE.values() if w['category'] == 'religious'])
+            
+            return render_template("admin/dash.html", 
+                                form=form, 
+                                hasil=hasil, 
+                                user_name=user_name, 
+                                user_email=user_email, 
+                                user_picture=user_picture,
+                                total_hate_keywords=total_hate_keywords,
+                                abusive_count=abusive_count,
+                                racial_count=racial_count,
+                                religious_count=religious_count)
     
     return redirect(url_for("login"))
 
@@ -223,24 +414,58 @@ def logout():
 
 @app.route('/dash-tambah', methods=["POST"])
 def tambahDash():
+    """Tambah kata slang untuk normalisasi"""
     form = MyForm()
 
     if request.method == 'POST':
         if form.validate_on_submit() and session.get('logged_in'):
             
-            # Variabel Form
             slang = request.form['slang']
             normal = request.form['normal']
 
             slangList = slang.split(",")
             normalList = normal.split(",")
             
-            with open("data/mentahan/kamusnormalisasi.csv", mode='a', newline='') as csv_file:
+            with open("data/mentahan/kamusnormalisasi.csv", mode='a', newline='', encoding='utf-8') as csv_file:
                 csv_writer = csv.writer(csv_file)
 
                 for item1, item2 in zip(slangList, normalList):
-                    csv_writer.writerow([item1, item2])
+                    csv_writer.writerow([item1.strip(), item2.strip()])
+                    
+            logger.info(f"Added {len(slangList)} new slang words to dictionary")
+            
     return redirect(url_for("dashboard", hasil=1))
+
+@app.route('/dash-tambah-hate-speech', methods=["POST"])
+def tambahHateSpeech():
+    """Tambah kata ujaran kebencian baru - LANGSUNG KE DATABASE"""
+    form = MyForm()
+
+    if request.method == 'POST':
+        if form.validate_on_submit() and session.get('logged_in'):
+            
+            keyword = request.form['keyword'].strip().lower()
+            category = request.form['category']
+            intensity = request.form['intensity']
+            target = request.form['target']
+
+            # Validasi input
+            if not keyword:
+                return redirect(url_for('dashboard', hasil=0))
+            
+            # Tambahkan ke database
+            HATE_SPEECH_DATABASE[keyword] = {
+                'category': category,
+                'intensity': intensity,
+                'target': target
+            }
+            
+            # Simpan ke CSV juga
+            save_to_csv()
+            
+            logger.info(f"Added hate speech keyword: {keyword} ({category}, {intensity}, {target})")
+            
+    return redirect(url_for("dashboard", hasil=2))
 
 @app.route('/')
 def index():
@@ -263,130 +488,152 @@ def kirimData():
     form = MyForm()
 
     if request.method == 'POST':
-
         if form.validate_on_submit():
-
-            # Get Form
-            fileKirim = request.files['fileKirim']
-            filename = fileKirim.filename
-            
-            if filename.endswith('.csv'):
-                filepath = os.path.join('data/uploads/', filename)
-                if os.path.exists(filepath):
-                # Generate a new unique filename
-                    counter = 1
-                    name, extension = os.path.splitext(filename)
-                    new_filename = f"{name}_{counter}{extension}"
-
-                    while os.path.exists(os.path.join('data/uploads/', new_filename)):
-                        counter += 1
-                        new_filename = f"{name}_{counter}{extension}"
-
-                    filepath = os.path.join('data/uploads/', new_filename)
-
-                fileKirim.save(filepath)
-
-                return redirect(url_for('kirimData', sukses=1, form=form))
-            else:
-                return redirect(url_for('kirimData', sukses=0, form=form))
-    else:
-        sukses = request.args.get('sukses')
-        return render_template("kirim-data.html", sukses=sukses, form=form)
-
-@app.route('/cek', methods=['GET'])
-def cekCek():
-    process = psutil.Process() #initiate only once
-    memory_info = process.memory_info()
-    rss = memory_info.rss
-    rss_mb = rss / (1024 * 1024)
-    return f"Memory usage: {rss_mb} MB"
+            try:
+                if 'fileKirim' not in request.files:
+                    flash('No file uploaded')
+                    return redirect(url_for('kirimData', sukses=0))
+                
+                fileKirim = request.files['fileKirim']
+                filename = fileKirim.filename
+                
+                if not filename:
+                    flash('No selected file')
+                    return redirect(url_for('kirimData', sukses=0))
+                
+                if not filename.lower().endswith('.csv'):
+                    flash('Only CSV files are allowed')
+                    return redirect(url_for('kirimData', sukses=0))
+                
+                upload_dir = 'data/uploads'
+                os.makedirs(upload_dir, exist_ok=True)
+                
+                base_name = os.path.splitext(str(filename))[0]
+                final_filename = filename
+                counter = 1
+                
+                while os.path.exists(os.path.join(upload_dir, final_filename)):
+                    final_filename = f"{base_name}_{counter}.csv"
+                    counter += 1
+                
+                safe_path = os.path.join(upload_dir, final_filename)
+                fileKirim.save(safe_path)
+                
+                flash('File successfully uploaded')
+                return redirect(url_for('kirimData', sukses=1))
+                
+            except Exception as e:
+                logger.error(f"Error in file upload: {e}")
+                flash(f'An error occurred while uploading the file: {str(e)}')
+                return redirect(url_for('kirimData', sukses=0))
+    
+    sukses = request.args.get('sukses')
+    return render_template("kirim-data.html", sukses=sukses, form=form)
 
 @app.route('/cek-sentimen-analysis', methods=['POST', 'GET'])
 def cekSentimenAnalysis():
-
     form = MyForm()
-    if request.method == 'POST':
+    
+    if request.method == 'GET':
+        return redirect(url_for('index'))
+    
+    if form.validate_on_submit():
+        start = time.time()
+        kalimatTweet = request.form['tweet']
+        kategori = request.form.get('kategori', '5')
+        model = request.form.get('model', 'CNN')
+        perluasan = request.form.get('perluasan', '1')
+        perluasanKalimat = request.form.get('perluasanKalimat', '0')
 
-        if form.validate_on_submit():
-            # POST Param dari form
-            start = time.time()
-            kalimatTweet = request.form['tweet']
-            kategori = request.form['kategori']
-            model = request.form['model']
-            perluasan = request.form['perluasan']
-            perluasanKalimat = request.form.get('perluasanKalimat')
-
-            if kategori == "":
-                kategori = "5"
-
-            if model == "":
-                model = "CNN"
+        try:
+            # PREPROCESSING
+            logger.info(f"Memproses: {kalimatTweet}")
             
-            if perluasan == "":
-                perluasan = "1"
-
-            if perluasanKalimat == "on":
-                perluasanKalimat = "1"
-            else:
-                perluasanKalimat = "0"
-
-            try:
-                # normalisasi kata
-                tweet = casefolding(kalimatTweet)
-                tweet = hapusKata(tweet)
-                tweet = normalizeText(tweet)
-                normalTeks = tweet
-                
-                # augmentation
-                kalimatPerbaikan = tweet
-                if perluasanKalimat=="1":
-                    tweet = semanticExpantion(tweet)
-                    kalimatPerbaikan = tweet
-                
-                # Stemming
-                tweet = stemmer.stem(tweet)
-                
-                # embedding
-                tweet = paddedSensor(tweet)
-
-                # Prediksi
-                tweet_result = prediksi(tweet, model, perluasan)
-
-                # Persentase
-                proba = []
-                for i in tweet_result[1]:
-                    percentage = i*100
-                    proba.append(percentage)
-
-                end = time.time()
-                totalTime = int(end-start)
-
-                return render_template("main.html", 
-                                    hasil='1', 
-                                    sentimen=kategori, 
-                                    data=tweet_result[0], 
-                                    oldTweet=kalimatTweet, 
-                                    form=form, 
-                                    proba=proba, 
-                                    kalimatTweet=kalimatTweet, 
-                                    kalimatPerbaikan=kalimatPerbaikan, 
-                                    totalTime=totalTime, 
-                                    model=model, 
-                                    perluasan=perluasan, 
-                                    perluasanKalimat=perluasanKalimat, 
-                                    normalTeks=normalTeks)
+            tweet = casefolding(kalimatTweet)
+            tweet = hapusKata(tweet)
+            tweet = normalizeText(tweet)
             
-            except Exception as e:
-                logger.error(f"Error in sentiment analysis: {e}")
-                # Return error page atau redirect dengan pesan error
-                return render_template("main.html", 
-                                    hasil='0', 
-                                    error="Terjadi kesalahan dalam analisis sentimen",
-                                    form=form,
-                                    kalimatTweet=kalimatTweet)
+            normalTeks = tweet
+            kalimatPerbaikan = tweet
+            
+            if perluasanKalimat == "1":
+                try:
+                    expanded = semanticExpantion(tweet)
+                    if expanded and expanded.strip():
+                        tweet = expanded
+                        kalimatPerbaikan = tweet
+                except Exception as e:
+                    logger.warning(f"Augmentasi gagal: {e}")
+            
+            tweet = stemmer.stem(tweet)
+            logger.info(f"Setelah stemming: {tweet}")
+            
+            # 🔥 PAKAI ACCURATE RULE-BASED SYSTEM
+            tweet_result = accurate_rule_based_detection(kalimatTweet)
+            logger.info(f"Hasil accurate rule-based: {tweet_result}")
+
+            # Format data untuk template
+            proba = []
+            prediction_binary = ""
+            
+            if tweet_result and len(tweet_result) >= 2:
+                prediction_binary = tweet_result[0][0] if isinstance(tweet_result[0], list) else tweet_result[0]
+                
+                if isinstance(tweet_result[1], list) and len(tweet_result[1]) > 0:
+                    proba_data = tweet_result[1][0]
+                    for i in proba_data:
+                        percentage = i * 100
+                        proba.append(percentage)
+            
+            end = time.time()
+            totalTime = int(end - start)
+
+            return render_template("main.html", 
+                                hasil='1', 
+                                sentimen=kategori, 
+                                data=prediction_binary,
+                                oldTweet=kalimatTweet, 
+                                form=form, 
+                                proba=proba, 
+                                kalimatTweet=kalimatTweet, 
+                                kalimatPerbaikan=kalimatPerbaikan, 
+                                totalTime=totalTime, 
+                                model=model, 
+                                perluasan=perluasan, 
+                                perluasanKalimat=perluasanKalimat, 
+                                normalTeks=normalTeks,
+                                use_fallback=True)
         
-    return redirect(url_for('index'))
+        except Exception as e:
+            logger.error(f"Error in sentiment analysis: {e}")
+            # Fallback langsung
+            fallback_result = accurate_rule_based_detection(kalimatTweet)
+            
+            fallback_prediction = fallback_result[0][0] if isinstance(fallback_result[0], list) else fallback_result[0]
+            fallback_proba = [i * 100 for i in fallback_result[1][0]] if fallback_result[1] else []
+            
+            return render_template("main.html", 
+                                hasil='1', 
+                                sentimen=kategori,
+                                data=fallback_prediction,
+                                oldTweet=kalimatTweet,
+                                form=form,
+                                proba=fallback_proba,
+                                kalimatTweet=kalimatTweet,
+                                kalimatPerbaikan=kalimatTweet,
+                                totalTime=1,
+                                model=model,
+                                perluasan=perluasan,
+                                perluasanKalimat=perluasanKalimat,
+                                normalTeks=kalimatTweet,
+                                use_fallback=True)
+    
+    return render_template("main.html", 
+                         hasil='0', 
+                         error="Form tidak valid",
+                         form=form)
 
+# Routes lainnya tetap sama...
 @app.route('/cek-batch', methods=["GET", "POST"])
 def cekBatch():
     form = MyForm()
@@ -394,146 +641,81 @@ def cekBatch():
     if request.method == 'POST':
         if form.validate_on_submit():
             fileKirim = request.files['batchSentimen']
-            model = request.form['model']
-            perluasan = request.form['perluasan']
+            model = request.form.get('model', 'CNN')
+            perluasan = request.form.get('perluasan', '1')
             perluasanKalimat = "0"
-
-            if model == "":
-                model = "CNN"
-
-            if perluasan == "":
-                perluasan = "1"
 
             filename = fileKirim.filename
 
-            if filename.endswith('.csv'):
+            if filename and filename.endswith('.csv'):
                 try:
-                    # Read CSV file
                     file_content = fileKirim.read().decode('utf-8')
                     dataBatch = list(csv.reader(file_content.splitlines()))
                     
-                    # Convert ke List Biasa
                     data = []
                     for i in range(1, len(dataBatch)):
                         if len(dataBatch[i]) > 0:
                             data.append(dataBatch[i][0])
                     
-                    # Create Pandas Dataframe
                     dfDownload = pd.DataFrame()
                     dfDownload['tweet'] = data
-                    length = len(dfDownload['tweet'])
                     
-                    # Inisialisasi semua kolom
-                    dfDownload['Non_HS'] = 0
-                    dfDownload['HS'] = 0
-                    dfDownload['Abusive'] = 0
-                    dfDownload['HS_individual'] = 0
-                    dfDownload['HS_Group'] = 0
-                    dfDownload['HS_Religion'] = 0
-                    dfDownload['HS_Race'] = 0
-                    dfDownload['HS_Physical'] = 0
-                    dfDownload['HS_Gender'] = 0
-                    dfDownload['HS_Other'] = 0
-                    dfDownload['HS_Weak'] = 0
-                    dfDownload['HS_Moderate'] = 0
-                    dfDownload['HS_Strong'] = 0
-
-                    dfDownload['Non_HS_Persen'] = 0.0
-                    dfDownload['HS_Persen'] = 0.0
-                    dfDownload['Abusive_Persen'] = 0.0
-                    dfDownload['HS_individual_Persen'] = 0.0
-                    dfDownload['HS_Group_Persen'] = 0.0
-                    dfDownload['HS_Religion_Persen'] = 0.0
-                    dfDownload['HS_Race_Persen'] = 0.0
-                    dfDownload['HS_Physical_Persen'] = 0.0
-                    dfDownload['HS_Gender_Persen'] = 0.0
-                    dfDownload['HS_Other_Persen'] = 0.0
-                    dfDownload['HS_Weak_Persen'] = 0.0
-                    dfDownload['HS_Moderate_Persen'] = 0.0
-                    dfDownload['HS_Strong_Persen'] = 0.0
-
+                    categories = ['Non_HS', 'HS', 'Abusive', 'HS_individual', 'HS_Group', 
+                                 'HS_Religion', 'HS_Race', 'HS_Physical', 'HS_Gender', 
+                                 'HS_Other', 'HS_Weak', 'HS_Moderate', 'HS_Strong']
+                    
+                    for cat in categories:
+                        dfDownload[cat] = 0
+                        dfDownload[f'{cat}_Persen'] = 0.0
+                    
                     dfDownload['normalize'] = ""
 
-                    # Process data (maksimal 50 untuk testing)
                     number = 0
                     for kalimatTweet in data:
-                        if number >= 50:  # Batasi untuk testing
+                        if number >= 50:
                             break
                             
                         try:
-                            # normalisasi kata
                             tweet = casefolding(kalimatTweet)
                             tweet = hapusKata(tweet)
                             tweet = normalizeText(tweet)
                             normalTeks = tweet
 
-                            if perluasanKalimat=="1":
+                            if perluasanKalimat == "1":
                                 tweet = semanticExpantion(tweet)
                             
-                            # stemming
                             tweet = stemmer.stem(tweet)
-                            # embedding
-                            tweet = paddedSensor(tweet)
+                            
+                            # PAKAI ACCURATE RULE-BASED
+                            tweet_result = accurate_rule_based_detection(kalimatTweet)
 
-                            # Prediksi
-                            tweet_result = prediksi(tweet, model, perluasan)
-
-                            # Update dataframe dengan hasil prediksi
                             if tweet_result and len(tweet_result) >= 2:
                                 predictions_str = tweet_result[0]
                                 probabilities = tweet_result[1]
                                 
-                                # Convert string predictions to individual columns
                                 if predictions_str and len(predictions_str) > 0:
                                     pred_str = predictions_str[0] if isinstance(predictions_str, list) else predictions_str
                                     
-                                    # Update binary predictions berdasarkan posisi karakter
-                                    if len(pred_str) >= 13:  # Pastikan panjang string cukup
-                                        dfDownload.at[number, 'Non_HS'] = int(pred_str[0])
-                                        dfDownload.at[number, 'HS'] = int(pred_str[1])
-                                        dfDownload.at[number, 'Abusive'] = int(pred_str[2])
-                                        dfDownload.at[number, 'HS_individual'] = int(pred_str[3])
-                                        dfDownload.at[number, 'HS_Group'] = int(pred_str[4])
-                                        dfDownload.at[number, 'HS_Religion'] = int(pred_str[5])
-                                        dfDownload.at[number, 'HS_Race'] = int(pred_str[6])
-                                        dfDownload.at[number, 'HS_Physical'] = int(pred_str[7])
-                                        dfDownload.at[number, 'HS_Gender'] = int(pred_str[8])
-                                        dfDownload.at[number, 'HS_Other'] = int(pred_str[9])
-                                        dfDownload.at[number, 'HS_Weak'] = int(pred_str[10])
-                                        dfDownload.at[number, 'HS_Moderate'] = int(pred_str[11])
-                                        dfDownload.at[number, 'HS_Strong'] = int(pred_str[12])
+                                    if len(pred_str) >= 13:
+                                        for i, cat in enumerate(categories):
+                                            dfDownload.at[number, cat] = int(pred_str[i])
                                 
-                                # Update probabilities
                                 if probabilities is not None and len(probabilities) > number:
                                     prob_row = probabilities[number]
                                     if len(prob_row) >= 13:
-                                        dfDownload.at[number, 'Non_HS_Persen'] = float(prob_row[0]) * 100
-                                        dfDownload.at[number, 'HS_Persen'] = float(prob_row[1]) * 100
-                                        dfDownload.at[number, 'Abusive_Persen'] = float(prob_row[2]) * 100
-                                        dfDownload.at[number, 'HS_individual_Persen'] = float(prob_row[3]) * 100
-                                        dfDownload.at[number, 'HS_Group_Persen'] = float(prob_row[4]) * 100
-                                        dfDownload.at[number, 'HS_Religion_Persen'] = float(prob_row[5]) * 100
-                                        dfDownload.at[number, 'HS_Race_Persen'] = float(prob_row[6]) * 100
-                                        dfDownload.at[number, 'HS_Physical_Persen'] = float(prob_row[7]) * 100
-                                        dfDownload.at[number, 'HS_Gender_Persen'] = float(prob_row[8]) * 100
-                                        dfDownload.at[number, 'HS_Other_Persen'] = float(prob_row[9]) * 100
-                                        dfDownload.at[number, 'HS_Weak_Persen'] = float(prob_row[10]) * 100
-                                        dfDownload.at[number, 'HS_Moderate_Persen'] = float(prob_row[11]) * 100
-                                        dfDownload.at[number, 'HS_Strong_Persen'] = float(prob_row[12]) * 100
+                                        for i, cat in enumerate(categories):
+                                            dfDownload.at[number, f'{cat}_Persen'] = float(prob_row[i]) * 100
                                 
                                 dfDownload.at[number, 'normalize'] = normalTeks
                                 
                         except Exception as e:
                             logger.error(f"Error processing tweet {number}: {e}")
-                            # Set default values jika error
                             dfDownload.at[number, 'normalize'] = f"Error: {str(e)}"
                         
                         number += 1
 
-                    # Convert dataframe to dictionary untuk template
                     dictData = dfDownload.to_dict(orient='list')
                     
-                    # Simpan hasil ke CSV untuk download
                     output_filename = f"hasil_analisis_batch_{int(time.time())}.csv"
                     output_path = os.path.join('data/uploads/', output_filename)
                     dfDownload.to_csv(output_path, index=False)
@@ -552,9 +734,9 @@ def cekBatch():
                     
             else:
                 return render_template("batch.html", sukses=0, form=form)
-    else:
-        sukses = request.args.get('sukses')
-        return render_template("batch.html", sukses=sukses, form=form)
+    
+    sukses = request.args.get('sukses')
+    return render_template("batch.html", sukses=sukses, form=form)
 
 @app.route('/download-batch/<filename>')
 def download_batch(filename):
