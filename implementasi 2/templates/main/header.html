@@ -1,40 +1,54 @@
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ title }}</title>
-  <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
-  <link rel="stylesheet" type=text/css href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-  <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-
-  <!-- SWAL -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
-<body>
-  <nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container">
-      <a class="navbar-brand" href="/">Sistem Pengujian Ujaran Kebencian</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a id="linkBatch" class="nav-link {{ 'active' if link==1 else '' }}" href="/batch">Unggah Berkas</a>
-          </li>
-          <li class="nav-item">
-            <a id="linkData" class="nav-link {{ 'active' if link==2 else '' }}" href="/kirim-data">Kirim Data</a>
-          </li>
-            {% if session["iHateSession"]==".78gua$higutya56sd7a8syugt43234]`" %}
-            <li class="nav-item">
-              <a id="linkData" class="nav-link" href="/logout">Logout</a>
-            </li>
-            {% endif %}
-        </ul>
-      </div>
+<div class="container-fluid py-4">
+    <div class="row main-header">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="logo-container">
+                    <div class="logo floating">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <h1 class="header-title">{% block header_title %}Sistem Deteksi Ujaran Kebencian{% endblock %}</h1>
+                        <p class="header-subtitle">
+                            {% block header_subtitle %}Analisis Ujaran Kebencian Secara Real-Time{% endblock %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </nav>
-  <div class="container">
+
+    <!-- User Info Card (if logged in) -->
+    {% if session.get('logged_in') %}
     <div class="row">
-      <div class="col-md-12" style="margin-top: 3rem;">
+        <div class="col-12">
+            <div class="user-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3">
+                        {% if session.get('picture') %}
+                        <img src="{{ session.picture }}" alt="Profile" class="user-avatar" />
+                        {% else %}
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        {% endif %}
+                        <div class="user-info">
+                            <h3 class="user-name">{{ session.get('name', 'User') }}</h3>
+                            <p class="user-email">{{ session.get('email', '') }}</p>
+                            <span class="login-badge">
+                                {% if 'gmail.com' in session.get('email', '') or 'google' in session.get('email', '') %}
+                                <i class="fab fa-google me-1"></i> Google Login 
+                                {% else %}
+                                <i class="fas fa-key me-1"></i> Manual Login 
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('logout') }}" class="logout-btn">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>

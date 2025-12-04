@@ -1,1165 +1,413 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sistem Uji Teks Ujaran Kebencian</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        :root {
-            --primary: #3b82f6;
-            --primary-dark: #1d4ed8;
-            --primary-light: #60a5fa;
-            --secondary: #6366f1;
-            --success: #10b981;
-            --info: #06b6d4;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --dark: #1f2937;
-            --light: #f8fafc;
-            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            --gradient-secondary: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            --gradient-glass: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(29, 78, 216, 0.1) 100%);
-            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--gradient-primary);
-            min-height: 100vh;
-            color: #374151;
-        }
-
-        .app-container {
-            min-height: 100vh;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Sidebar Styles */
-        .sidebar {
-            background: var(--gradient-primary);
-            color: white;
-            min-height: 100vh;
-            padding: 0;
-            box-shadow: var(--shadow-xl);
-            position: fixed;
-            width: 280px;
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar.collapsed {
-            width: 80px;
-        }
-
-        .sidebar-header {
-            padding: 2rem 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-        }
-
-        .sidebar-logo {
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .sidebar-title {
-            color: white;
-            font-weight: 700;
-            font-size: 1.2rem;
-            margin: 1rem 0 0.5rem;
-        }
-
-        .sidebar-subtitle {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.8rem;
-        }
-
-        .sidebar-menu {
-            padding: 1.5rem 0;
-        }
-
-        .nav-item {
-            margin-bottom: 0.5rem;
-        }
-
-        .nav-link {
-            color: rgba(255, 255, 255, 0.8);
-            padding: 1rem 1.5rem;
-            border-radius: 0;
-            border-left: 4px solid transparent;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            text-decoration: none;
-        }
-
-        .nav-link:hover {
-            color: white;
-            background: rgba(255, 255, 255, 0.1);
-            border-left-color: var(--primary-light);
-        }
-
-        .nav-link.active {
-            color: white;
-            background: rgba(255, 255, 255, 0.15);
-            border-left-color: var(--success);
-        }
-
-        .nav-link i {
-            width: 20px;
-            text-align: center;
-        }
-
-        .nav-text {
-            transition: opacity 0.3s ease;
-        }
-
-        .sidebar.collapsed .nav-text {
-            opacity: 0;
-            display: none;
-        }
-
-        .sidebar.collapsed .sidebar-title,
-        .sidebar.collapsed .sidebar-subtitle {
-            display: none;
-        }
-
-        .toggle-sidebar {
-            position: absolute;
-            top: 1rem;
-            right: -12px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 0.8rem;
-            box-shadow: var(--shadow-md);
-            transition: all 0.3s ease;
-        }
-
-        .toggle-sidebar:hover {
-            transform: scale(1.1);
-        }
-
-        /* Main Content */
-        .main-content {
-            margin-left: 280px;
-            transition: all 0.3s ease;
-            min-height: 100vh;
-        }
-
-        .main-content.expanded {
-            margin-left: 80px;
-        }
-
-        .app-container::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 300px;
-            background: var(--gradient-primary);
-            clip-path: polygon(0 0, 100% 0, 100% 70%, 0 100%);
-            z-index: 0;
-        }
-
-        /* Header Styles */
-        .main-header {
-            position: relative;
-            z-index: 10;
-            padding: 2rem 0 1rem;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .logo {
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .logo i {
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        .header-title {
-            color: white;
-            font-weight: 700;
-            font-size: 1.8rem;
-            margin: 0;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-subtitle {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
-            margin: 0;
-        }
-
-        /* User Info Card */
-        .user-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: var(--shadow-lg);
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            position: relative;
-            z-index: 10;
-            transition: all 0.3s ease;
-        }
-
-        .user-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-xl);
-        }
-
-        .user-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--gradient-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: white;
-            border: 3px solid white;
-            box-shadow: var(--shadow-md);
-        }
-
-        .user-info {
-            flex: 1;
-        }
-
-        .user-name {
-            font-weight: 600;
-            color: var(--dark);
-            margin: 0;
-        }
-
-        .user-email {
-            color: #6b7280;
-            font-size: 0.9rem;
-            margin: 0;
-        }
-
-        .login-badge {
-            background: var(--gradient-success);
-            color: white;
-            border: none;
-            font-size: 0.7rem;
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-        }
-
-        .logout-btn {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            border-radius: 12px;
-            padding: 0.5rem 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .logout-btn:hover {
-            background: var(--danger);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        /* Main Card */
-        .main-card {
-            background: white;
-            border-radius: 24px;
-            box-shadow: var(--shadow-xl);
-            border: none;
-            overflow: hidden;
-            margin-bottom: 2rem;
-            position: relative;
-            z-index: 10;
-            transition: all 0.3s ease;
-        }
-
-        .main-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-        }
-
-        .card-header-custom {
-            background: var(--gradient-primary);
-            color: white;
-            padding: 2rem;
-            border: none;
-        }
-
-        .card-title {
-            font-weight: 700;
-            font-size: 1.5rem;
-            margin: 0;
-        }
-
-        .card-subtitle {
-            opacity: 0.9;
-            font-size: 0.95rem;
-            margin: 0.5rem 0 0;
-        }
-
-        .card-body-custom {
-            padding: 2rem;
-        }
-
-        /* Form Styles */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: var(--dark);
-            margin-bottom: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-label i {
-            color: var(--primary);
-        }
-
-        .form-control-custom {
-            border: 2px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 1rem 1.2rem;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            background: #fafafa;
-        }
-
-        .form-control-custom:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-            background: white;
-            transform: translateY(-2px);
-        }
-
-        .form-select-custom {
-            border: 2px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 1rem 1.2rem;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            background: #fafafa;
-        }
-
-        .form-select-custom:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-            background: white;
-            transform: translateY(-2px);
-        }
-
-        .form-check-input:checked {
-            background-color: var(--primary);
-            border-color: var(--primary);
-        }
-
-        /* Buttons */
-        .btn-custom-primary {
-            background: var(--gradient-primary);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            padding: 1rem 2.5rem;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn-custom-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-lg);
-            color: white;
-            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-        }
-
-        .btn-custom-secondary {
-            background: white;
-            color: #6b7280;
-            border: 2px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 1rem 2rem;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .btn-custom-secondary:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        /* Table Styles */
-        .table-custom {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: var(--shadow-md);
-        }
-
-        .table-custom thead th {
-            background: var(--gradient-primary);
-            color: white;
-            border: none;
-            padding: 1.2rem;
-            font-weight: 600;
-        }
-
-        .table-custom tbody td {
-            padding: 1.2rem;
-            border-color: #f3f4f6;
-            vertical-align: middle;
-        }
-
-        .table-custom tbody tr:hover {
-            background-color: #f8fafc;
-        }
-
-        /* Results Card */
-        .result-card {
-            background: var(--gradient-glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-        }
-
-        /* Loading Overlay */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            backdrop-filter: blur(5px);
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3b82f6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Mobile Menu Button */
-        .mobile-menu-btn {
-            display: none;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 0.75rem 1rem;
-            font-size: 1.2rem;
-            position: fixed;
-            top: 1rem;
-            left: 1rem;
-            z-index: 1002;
-            box-shadow: var(--shadow-lg);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                transform: translateX(-100%);
-                z-index: 1001;
-            }
-
-            .sidebar.show {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0 !important;
-            }
-
-            .main-header {
-                padding: 1rem 0;
-            }
-
-            .header-title {
-                font-size: 1.4rem;
-            }
-
-            .card-body-custom {
-                padding: 1.5rem;
-            }
-
-            .btn-custom-primary,
-            .btn-custom-secondary {
-                width: 100%;
-                margin-bottom: 1rem;
-            }
-
-            .mobile-menu-btn {
-                display: block !important;
-            }
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-dark);
-        }
-    </style>
-</head>
-<body>
-    <!-- Mobile Menu Button -->
-    <button class="mobile-menu-btn" id="mobileMenuBtn">
-        <i class="fas fa-bars"></i>
-    </button>
-
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <button class="toggle-sidebar" id="toggleSidebar">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-
-        <div class="sidebar-header">
-            <div class="sidebar-logo floating">
-                <i class="fas fa-shield-alt"></i>
-            </div>
-            <h3 class="sidebar-title">SISTEM DETEKSI UJARAN KEBENCIAN</h3>
-            <p class="sidebar-subtitle">Sistem Analisis Ujaran Kebencian</p>
-        </div>
-
-        <div class="sidebar-menu">
-            <!-- DASHBOARD HARUS DI DALAM sidebar-menu -->
-            <div class="nav-item">
-                <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' or request.endpoint == 'tambahDash' %}active{% endif %}">
-                    <i class="fas fa-home"></i>
-                    <span class="nav-text">Dashboard</span>
-                </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' or request.endpoint == 'cekSentimenAnalysis' %}active{% endif %}">
-                    <i class="fas fa-search"></i>
-                    <span class="nav-text">Sistem Pengujian</span>
-                </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="{{ url_for('batch') }}" class="nav-link {% if request.endpoint == 'batch' or request.endpoint == 'cekBatch' %}active{% endif %}">
-                    <i class="fas fa-layer-group"></i>
-                    <span class="nav-text">Unggah Berkas</span>
-                </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="{{ url_for('kirimData') }}" class="nav-link {% if request.endpoint == 'kirimData' %}active{% endif %}">
-                    <i class="fas fa-upload"></i>
-                    <span class="nav-text">Kirim Data</span>
-                </a>
-            </div>
-
-            {% if session.get('logged_in') %}
-            <div class="nav-item mt-4">
-                <a href="{{ url_for('logout') }}" class="nav-link">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span class="nav-text">Logout</span>
-                </a>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content" id="mainContent">
-        <div class="app-container">
-            <div class="container-fluid py-4">
-                <!-- Header -->
-                <div class="row main-header">
-                    <div class="col-12">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="logo-container">
-                                <div class="logo floating">
-                                    <i class="fas fa-shield-alt"></i>
-                                </div>
-                                <div>
-                                    <h1 class="header-title">Hate Speech Detector</h1>
-                                    <p class="header-subtitle">Sistem Analisis Ujaran Kebencian</p>
-                                </div>
-                            </div>
-                            <div class="d-none d-md-flex align-items-center gap-3">
-                                <span class="text-white-50">v2.0</span>
-                                <div class="bg-white-20 rounded-pill px-3 py-1">
-                                    <small class="text-white">
-                                        <i class="fas fa-circle text-success me-1"></i>
-                                        Online
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
+{% extends "base.html" %}
+
+{% block title %}Sistem Uji Teks Ujaran Kebencian{% endblock %}
+
+{% block header_title %}Hate Speech Detector{% endblock %}
+{% block header_subtitle %}Sistem Analisis Ujaran Kebencian{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Main Form Card -->
+    <div class="row justify-content-center">
+        <div class="col-xl-12 col-lg-12">
+            <div class="main-card">
+                <div class="card-header-custom">
+                    <div class="text-center">
+                        <h2 class="card-title">
+                            <i class="fas fa-ban me-2"></i> Tambah Kata Ujaran Kebencian
+                        </h2>
+                        <p class="card-subtitle">
+                            Tambahkan kata-kata yang termasuk ujaran kebencian ke database
+                        </p>
                     </div>
                 </div>
+                <div class="card-body-custom">
+                    <form
+                        action="{{ url_for('tambahHateSpeech') }}"
+                        method="POST"
+                        id="hateSpeechForm"
+                    >
+                        {{ form.csrf_token }}
 
-                <!-- User Info Card (if logged in) -->
-                {% if session.get('logged_in') %}
-                <div class="row">
-                    <div class="col-12">
-                        <div class="user-card">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center gap-3">
-                                    {% if session.get('picture') %}
-                                    <img src="{{ session.picture }}" alt="Profile" class="user-avatar" />
-                                    {% else %}
-                                    <div class="user-avatar">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    {% endif %}
-                                    <div class="user-info">
-                                        <h3 class="user-name">{{ session.get('name', 'User') }}</h3>
-                                        <p class="user-email">{{ session.get('email', '') }}</p>
-                                        <span class="login-badge">
-                                            {% if 'gmail.com' in session.get('email', '') or 'google' in session.get('email', '') %}
-                                            <i class="fab fa-google me-1"></i> Google Login 
-                                            {% else %}
-                                            <i class="fas fa-key me-1"></i> Manual Login 
-                                            {% endif %}
-                                        </span>
+                        <!-- Info Alert -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="info-alert">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-info-circle alert-icon me-3"></i>
+                                        <div class="flex-grow-1">
+                                            <strong class="d-block mb-1">Cara Kerja Sistem</strong>
+                                            <span
+                                                >Tambahkan kata-kata ujaran kebencian ke database. Setelah
+                                                ditambahkan, sistem akan langsung mendeteksi kata tersebut
+                                                sebagai ujaran kebencian ketika di-test.</span
+                                            >
+                                        </div>
                                     </div>
                                 </div>
-                                <a href="{{ url_for('logout') }}" class="logout-btn">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                </a>
                             </div>
                         </div>
-                    </div>
-                </div>
-                {% endif %}
 
-                <!-- Main Form Card -->
-                <div class="row justify-content-center">
-                    <div class="col-xl-12 col-lg-12">
-                        <div class="main-card">
-                            <div class="card-header-custom">
-                                <div class="text-center">
-                                    <h2 class="card-title">
-                                        <i class="fab fa-twitter me-2"></i> Prediksi Teks Ujaran Kebencian
-                                    </h2>
-                                    <p class="card-subtitle">
-                                        Analisis teks untuk mendeteksi ujaran kebencian secara real-time
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="card-body-custom">
-                                <form action="{{ url_for('cekSentimenAnalysis')}}" method="POST" id="analysisForm">
-                                    {{ form.csrf_token }}
-                                    <div class="row">
-                                        <div class="col-lg-4 col-md-12 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">
-                                                    <i class="fas fa-comment-dots"></i>
-                                                    Teks untuk Dianalisis
-                                                </label>
-                                                <textarea name="tweet" id="tweet" class="form-control-custom" placeholder="Masukkan teks yang ingin dianalisis di sini..." required rows="4">{{ oldTweet if oldTweet }}</textarea>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-2 col-md-6 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">
-                                                    <i class="fas fa-filter"></i>
-                                                    Kelas Ujaran
-                                                </label>
-                                                <select name="kategori" id="kategori" class="form-select-custom" required>
-                                                    <option value="5">Semua</option>
-                                                    <option value="0" {% if sentimen == "0" %} selected {% endif %}>Ujaran Kebencian</option>
-                                                    <option value="1" {% if sentimen == "1" %} selected {% endif %}>Kata Kasar</option>
-                                                    <option value="2" {% if sentimen == "2" %} selected {% endif %}>Target</option>
-                                                    <option value="3" {% if sentimen == "3" %} selected {% endif %}>Kategori</option>
-                                                    <option value="4" {% if sentimen == "4" %} selected {% endif %}>Level</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-2 col-md-6 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">
-                                                    <i class="fas fa-brain"></i>
-                                                    Model
-                                                </label>
-                                                <select name="model" id="model" class="form-select-custom" required>
-                                                    <option value="CNN" {% if model == "CNN" %} selected {% endif %}>CNN</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-2 col-md-6 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">
-                                                    <i class="fas fa-expand-alt"></i>
-                                                    Model FuSE-CNN
-                                                </label>
-                                                <select name="perluasan" id="perluasan" class="form-select-custom" required>
-                                                    <option value="1" {% if perluasan == "1" %} selected {% endif %}>Ya</option>
-                                                    <option value="0" {% if perluasan == "0" %} selected {% endif %}>Tidak</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-2 col-md-6 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">
-                                                    <i class="fas fa-magic"></i>
-                                                    Opsi Tambahan
-                                                </label>
-                                                <div class="form-check form-switch mt-2">
-                                                    <input class="form-check-input" type="checkbox" name="perluasanKalimat" id="perluasanKalimat" {% if perluasanKalimat == "1" %} checked {% endif %}>
-                                                    <label class="form-check-label" for="perluasanKalimat">Perluasan Kalimat</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-12 text-center">
-                                            <button id="prosesSentimen" type="submit" class="btn-custom-primary">
-                                                <i class="fas fa-search me-2"></i> Cek Kalimat
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-
-                                <!-- Results Section -->
-                                {% if hasil=='1' %}
-                                <div class="row mt-4">
-                                    <div class="col-12">
-                                        <div class="result-card">
-                                            <h4 class="text-center mb-4"><i class="fas fa-chart-bar me-2"></i>Hasil Analisis</h4>
-                                            <div class="table-responsive">
-                                                <table class="table table-custom">
-                                                    <thead>
-                                                        <tr style="text-align: center;">
-                                                            {% if sentimen=='0' or sentimen=='5' %}
-                                                                <th scope="col">Bukan Ujaran</th>
-                                                                <th scope="col">Ujaran Kebencian</th>
-                                                            {% endif %}
-
-                                                            {% if sentimen=='1' or sentimen=='5' %}
-                                                                <th scope="col">Kata Kasar</th>
-                                                            {% endif %}
-
-                                                            {% if sentimen=='2' or sentimen=='5' %}
-                                                                <th scope="col">Individu</th>
-                                                                <th scope="col">Kelompok</th>
-                                                            {% endif %}
-
-                                                            {% if sentimen=='3' or sentimen=='5' %}
-                                                                <th scope="col">Agama</th>
-                                                                <th scope="col">Ras</th>
-                                                                <th scope="col">Fisik</th>
-                                                                <th scope="col">Gender</th>
-                                                                <th scope="col">Lain-lain</th>
-                                                            {% endif %}
-
-                                                            {% if sentimen=='4' or sentimen=='5' %}
-                                                                <th scope="col">Lemah</th>
-                                                                <th scope="col">Sedang</th>
-                                                                <th scope="col">Kuat</th>
-                                                            {% endif %}
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr style="text-align: center;">
-                                                            {% if sentimen=='0' or sentimen=='5' %}
-                                                                <td>
-                                                                    {% if data[0]=='1' %}
-                                                                        <i class="fas fa-check" style="color: #10b981; font-size: 1.2rem;"></i>
-                                                                    {% else %}
-                                                                        <i class="fas fa-times" style="color: #ef4444; font-size: 1.2rem;"></i>
-                                                                    {% endif %}
-                                                                </td>
-                                                                <td>
-                                                                    {% if data[1]=='1' %}
-                                                                        <i class="fas fa-check" style="color: #10b981; font-size: 1.2rem;"></i>
-                                                                    {% else %}
-                                                                        <i class="fas fa-times" style="color: #ef4444; font-size: 1.2rem;"></i>
-                                                                    {% endif %}
-                                                                </td>
-                                                            {% endif %}
-                                                            
-                                                            {% if sentimen=='1' or sentimen=='5' %}
-                                                                <td>
-                                                                    {% if data[2]=='1' %}
-                                                                        <i class="fas fa-check" style="color: #10b981; font-size: 1.2rem;"></i>
-                                                                    {% else %}
-                                                                        <i class="fas fa-times" style="color: #ef4444; font-size: 1.2rem;"></i>
-                                                                    {% endif %}
-                                                                </td>
-                                                            {% endif %}
-
-                                                            {% if sentimen=='2' or sentimen=='5' %}
-                                                            <td>
-                                                                {% if data[3]=='1' %}
-                                                                    <i class="fas fa-check" style="color: #10b981; font-size: 1.2rem;"></i>
-                                                                {% else %}
-                                                                    <i class="fas fa-times" style="color: #ef4444; font-size: 1.2rem;"></i>
-                                                                {% endif %}
-                                                            </td>
-                                                            <td>
-                                                                {% if data[4]=='1' %}
-                                                                    <i class="fas fa-check" style="color: #10b981; font-size: 1.2rem;"></i>
-                                                                {% else %}
-                                                                    <i class="fas fa-times" style="color: #ef4444; font-size: 1.2rem;"></i>
-                                                                {% endif %}
-                                                            </td>
-                                                            {% endif %}
-
-                                                            {% if sentimen=='3' or sentimen=='5' %}
-                                                                <td>
-                                                                    {% if data[5]=='1' %}
-                                                                        <i class="fas fa-check" style="color: #10b981; font-size: 1.2rem;"></i>
-                                                                    {% else %}
-                                                                        <i class="fas fa-times" style="color: #ef4444; font-size: 1.2rem;"></i>
-                                                                    {% endif %}
-                                                                </td>
-                                                                <td>
-                                                                    {% if data[6]=='1' %}
-                                                                        <i class="fas fa-check" style="color: #10b981; font-size: 1.2rem;"></i>
-                                                                    {% else %}
-                                                                        <i class="fas fa-times" style="color: #ef4444; font-size: 1.2rem;"></i>
-                                                                    {% endif %}
-                                                                </td>
-                                                                <td>
-                                                                    {% if data[7]=='1' %}
-                                                                        <i class="fas fa-check" style="color: #10b981; font-size: 1.2rem;"></i>
-                                                                    {% else %}
-                                                                        <i class="fas fa-times" style="color: #ef4444; font-size: 1.2rem;"></i>
-                                                                    {% endif %}
-                                                                </td>
-                                                                <td>
-                                                                    {% if data[8]=='1' %}
-                                                                        <i class="fas fa-check" style="color: #10b981; font-size: 1.2rem;"></i>
-                                                                    {% else %}
-                                                                        <i class="fas fa-times" style="color: #ef4444; font-size: 1.2rem;"></i>
-                                                                    {% endif %}
-                                                                </td>
-                                                                <td>
-                                                                    {% if data[9]=='1' %}
-                                                                        <i class="fas fa-check" style="color: #10b981; font-size: 1.2rem;"></i>
-                                                                    {% else %}
-                                                                        <i class="fas fa-times" style="color: #ef4444; font-size: 1.2rem;"></i>
-                                                                    {% endif %}
-                                                                </td>
-                                                            {% endif %}
-
-                                                            {% if sentimen=='4' or sentimen=='5' %}
-                                                                <td>
-                                                                    {% if data[10]=='1' %}
-                                                                        <i class="fas fa-check" style="color: #10b981; font-size: 1.2rem;"></i>
-                                                                    {% else %}
-                                                                        <i class="fas fa-times" style="color: #ef4444; font-size: 1.2rem;"></i>
-                                                                    {% endif %}
-                                                                </td>
-                                                                <td>
-                                                                    {% if data[11]=='1' %}
-                                                                        <i class="fas fa-check" style="color: #10b981; font-size: 1.2rem;"></i>
-                                                                    {% else %}
-                                                                        <i class="fas fa-times" style="color: #ef4444; font-size: 1.2rem;"></i>
-                                                                    {% endif %}
-                                                                </td>
-                                                                <td>
-                                                                    {% if data[12]=='1' %}
-                                                                        <i class="fas fa-check" style="color: #10b981; font-size: 1.2rem;"></i>
-                                                                    {% else %}
-                                                                        <i class="fas fa-times" style="color: #ef4444; font-size: 1.2rem;"></i>
-                                                                    {% endif %}
-                                                                </td>
-                                                            {% endif %}
-                                                        </tr>
-                                                        
-                                                        <!-- Probability Row -->
-                                                        <tr style="text-align: center; background-color: #f8fafc;">
-                                                            {% if sentimen=='0' or sentimen=='5' %}
-                                                                <td class="fw-bold text-primary">
-                                                                    {{ "{:.0f}%".format(proba[0]) if proba and proba|length > 0 else "0%" }}
-                                                                </td>
-                                                                <td class="fw-bold text-primary">
-                                                                    {{ "{:.0f}%".format(proba[1]) if proba and proba|length > 1 else "0%" }}
-                                                                </td>
-                                                            {% endif %}
-                                                            
-                                                            {% if sentimen=='1' or sentimen=='5' %}
-                                                                <td class="fw-bold text-primary">
-                                                                    {{ "{:.0f}%".format(proba[2]) if proba and proba|length > 2 else "0%" }}
-                                                                </td>
-                                                            {% endif %}
-
-                                                            {% if sentimen=='2' or sentimen=='5' %}
-                                                                <td class="fw-bold text-primary">
-                                                                    {{ "{:.0f}%".format(proba[3]) if proba and proba|length > 3 else "0%" }}
-                                                                </td>
-                                                                <td class="fw-bold text-primary">
-                                                                    {{ "{:.0f}%".format(proba[4]) if proba and proba|length > 4 else "0%" }}
-                                                                </td>
-                                                            {% endif %}
-
-                                                            {% if sentimen=='3' or sentimen=='5' %}
-                                                                <td class="fw-bold text-primary">
-                                                                    {{ "{:.0f}%".format(proba[5]) if proba and proba|length > 5 else "0%" }}
-                                                                </td>
-                                                                <td class="fw-bold text-primary">
-                                                                    {{ "{:.0f}%".format(proba[6]) if proba and proba|length > 6 else "0%" }}
-                                                                </td>
-                                                                <td class="fw-bold text-primary">
-                                                                    {{ "{:.0f}%".format(proba[7]) if proba and proba|length > 7 else "0%" }}
-                                                                </td>
-                                                                <td class="fw-bold text-primary">
-                                                                    {{ "{:.0f}%".format(proba[8]) if proba and proba|length > 8 else "0%" }}
-                                                                </td>
-                                                                <td class="fw-bold text-primary">
-                                                                    {{ "{:.0f}%".format(proba[9]) if proba and proba|length > 9 else "0%" }}
-                                                                </td>
-                                                            {% endif %}
-
-                                                            {% if sentimen=='4' or sentimen=='5' %}
-                                                                <td class="fw-bold text-primary">
-                                                                    {{ "{:.0f}%".format(proba[10]) if proba and proba|length > 10 else "0%" }}
-                                                                </td>
-                                                                <td class="fw-bold text-primary">
-                                                                    {{ "{:.0f}%".format(proba[11]) if proba and proba|length > 11 else "0%" }}
-                                                                </td>
-                                                                <td class="fw-bold text-primary">
-                                                                    {{ "{:.0f}%".format(proba[12]) if proba and proba|length > 12 else "0%" }}
-                                                                </td>
-                                                            {% endif %}
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
+                        <div class="row">
+                            <div class="col-12 mb-4">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-comment-dots"></i>
+                                        Kata Ujaran Kebencian
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="keyword"
+                                        id="keyword"
+                                        class="form-control-custom-large"
+                                        placeholder="Contoh: sayang, babi, kontol, bangsat, kafir, cina, dll."
+                                        required
+                                    />
+                                    <div class="form-text-custom">
+                                        <i class="fas fa-lightbulb me-1"></i>
+                                        Masukkan satu kata ujaran kebencian. Contoh:
+                                        "sayang" akan dideteksi sebagai kata abusive.
                                     </div>
                                 </div>
-
-                                <!-- Details Card -->
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="result-card">
-                                            <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>Keterangan Analisis</h5>
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <p class="mb-2"><strong>Kalimat Asli:</strong> {{ normalTeks }}</p>
-                                                    {% if perluasanKalimat=='1' %}
-                                                        <p class="mb-2"><strong>Perluasan Kalimat:</strong> {{ kalimatPerbaikan }}</p>
-                                                    {% endif %}
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <p class="mb-2"><strong>Kesimpulan:</strong>
-                                                        {% if data[0]=='1' %}
-                                                            <span class="text-success">Bukan Ujaran Kebencian</span>
-                                                            {{ ', namun terdeteksi sebagai <strong class="text-warning">Abusive</strong>' | safe if data[2]=='1' else '' }}.
-                                                        {% elif data[1]=='1' %}
-                                                            <span class="text-danger">Terindikasi Ujaran Kebencian</span> dan
-                                                            {{ 'terdapat <strong class="text-warning">Kata Kasar</strong>' | safe if data[2]=='1' else '' }},  
-                                                            Target 
-                                                            {{ '<strong>Grup</strong>' | safe if data[4]=='1' else '<strong>Individual</strong>' | safe }}, 
-                                                            Kategori 
-                                                            {{ '<strong>Agama</strong>,' | safe if data[5]=='1' }}
-                                                            {{ '<strong>Ras</strong>,' | safe if data[6]=='1' }}
-                                                            {{ '<strong>Fisik</strong>,' | safe if data[7]=='1' }}
-                                                            {{ '<strong>Gender</strong>,' | safe if data[8]=='1' }}
-                                                            {{ '<strong>Lain-lain</strong>,' | safe if data[9]=='1' }} 
-                                                            dengan Level Ujaran Kebencian 
-                                                            {% if data[10]=='1' %}
-                                                                <strong class="text-info">Lemah</strong>
-                                                            {% elif data[11]=='1' %}
-                                                                <strong class="text-warning">Sedang</strong>
-                                                            {% else %}
-                                                                <strong class="text-danger">Kuat</strong>
-                                                            {% endif %} 
-                                                        {% endif %}
-                                                    </p>
-                                                    <p class="mb-0"><strong>Waktu Proses:</strong> <span class="text-primary">{{ totalTime//60 }} menit {{ totalTime % 60}} detik</span></p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endif %}
                             </div>
                         </div>
-                    </div>
+
+                        <div class="row">
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="form-group option-card">
+                                    <label class="form-label">
+                                        <i class="fas fa-filter"></i>
+                                        Kategori
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <select
+                                        name="category"
+                                        id="category"
+                                        class="form-select-custom"
+                                        required
+                                    >
+                                        <option value="">Pilih Kategori</option>
+                                        <option value="abusive">
+                                            Abusive (Kata Kasar)
+                                        </option>
+                                        <option value="racial">Rasial</option>
+                                        <option value="religious">Agama</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="form-group option-card">
+                                    <label class="form-label">
+                                        <i class="fas fa-bolt"></i>
+                                        Intensitas
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <select
+                                        name="intensity"
+                                        id="intensity"
+                                        class="form-select-custom"
+                                        required
+                                    >
+                                        <option value="">Pilih Intensitas</option>
+                                        <option value="weak">Lemah</option>
+                                        <option value="moderate">Sedang</option>
+                                        <option value="strong">Kuat</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="form-group option-card">
+                                    <label class="form-label">
+                                        <i class="fas fa-bullseye"></i>
+                                        Target
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <select
+                                        name="target"
+                                        id="target"
+                                        class="form-select-custom"
+                                        required
+                                    >
+                                        <option value="">Pilih Target</option>
+                                        <option value="individual">Individu</option>
+                                        <option value="group">Grup/Kelompok</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="form-group option-card">
+                                    <label class="form-label">
+                                        <i class="fas fa-cog"></i>
+                                        Status
+                                    </label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" name="active" id="active" checked>
+                                        <label class="form-check-label" for="active">Aktif</label>
+                                    </div>
+                                    <div class="form-text-custom-small">
+                                        Kata akan langsung aktif untuk deteksi
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="row mt-4">
+                            <div class="col-12 text-center">
+                                <button
+                                    type="submit"
+                                    class="btn-custom-primary me-3"
+                                    id="submitHateSpeechBtn"
+                                >
+                                    <i class="fas fa-plus-circle me-2"></i> Tambah ke Database
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn-custom-secondary"
+                                    id="clearHateSpeechBtn"
+                                >
+                                    <i class="fas fa-eraser me-2"></i> Bersihkan Form
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
-        <div class="text-center">
-            <div class="loading-spinner mb-3"></div>
-            <h4 class="text-white">Memproses Analisis...</h4>
-            <p class="text-white-50">Tunggu sebentar, sistem sedang menganalisis teks</p>
-        </div>
-    </div>
+<style>
+    /* CSS untuk konsistensi design dengan dashboard - Hanya perbaikan kecil */
+    .card-header-custom {
+        background-color: #4a90e2;
+        color: white;
+        padding: 25px;
+    }
+    
+    .card-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    
+    .card-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    
+    /* Hapus gap antara header dan content */
+    .main-card {
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    
+    .card-body-custom {
+        padding: 30px;
+    }
+    
+    /* Text box besar seperti sebelumnya */
+    .form-control-custom-large {
+        width: 100%;
+        padding: 40px 20px;
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        font-size: 16px;
+        transition: all 0.3s;
+        background-color: #ffffff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .form-control-custom-large:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        outline: none;
+        transform: translateY(-1px);
+    }
+    
+    /* Option card besar seperti sebelumnya */
+    .option-card {
+        background-color: #ffffff;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        height: 100%;
+        transition: all 0.3s;
+        border: 1px solid #f1f5f9;
+    }
+    
+    .option-card:hover {
+        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        transform: translateY(-3px);
+        border-color: #e2e8f0;
+    }
+    
+    /* Select box besar */
+    .form-select-custom {
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        font-size: 15px;
+        background-color: #ffffff;
+        transition: all 0.3s;
+    }
+    
+    .form-select-custom:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        outline: none;
+    }
+    
+    .form-check-input:checked {
+        background-color: #4a90e2;
+        border-color: #4a90e2;
+    }
+    
+    /* Button styling */
+    .btn-custom-primary {
+        background-color: #4a90e2;
+        border: none;
+        padding: 14px 35px;
+        font-size: 16px;
+        border-radius: 8px;
+        color: white;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+    
+    .btn-custom-primary:hover {
+        background-color: #3a7bc8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .btn-custom-secondary {
+        background-color: #6b7280;
+        border: none;
+        padding: 14px 35px;
+        font-size: 16px;
+        border-radius: 8px;
+        color: white;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+    
+    .btn-custom-secondary:hover {
+        background-color: #4b5563;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    /* Info alert styling */
+    .info-alert {
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        border: 1px solid #bae6fd;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-icon {
+        color: #0ea5e9;
+        font-size: 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 10px;
+        display: block;
+        font-size: 15px;
+    }
+    
+    .form-text-custom {
+        color: #6b7280;
+        font-size: 13px;
+        margin-top: 8px;
+        font-style: italic;
+    }
+    
+    .form-text-custom-small {
+        color: #6b7280;
+        font-size: 12px;
+        margin-top: 6px;
+        font-style: italic;
+    }
+</style>
+{% endblock %}
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% block extra_js %}
+<script>
+    // Main (Dashboard) specific JavaScript
+    $(document).ready(function() {
+        console.log('🚀 Dashboard System Initialized');
 
-    <script>
-        // Initialize Application
-        $(document).ready(function() {
-            console.log('🚀 Hate Speech Detector Initialized');
+        // Hate Speech Form submission
+        $('#hateSpeechForm').on('submit', function(e) {
+            const keyword = $('#keyword').val().trim();
+            const category = $('#category').val();
+            const intensity = $('#intensity').val();
+            const target = $('#target').val();
 
-            // Sidebar toggle functionality
-            $('#toggleSidebar').on('click', function() {
-                const sidebar = $('#sidebar');
-                const mainContent = $('#mainContent');
-                const toggleIcon = $('#toggleSidebar i');
+            if (!keyword || !category || !intensity || !target) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Form tidak lengkap!',
+                    text: 'Harap isi semua field yang diperlukan.'
+                });
+                return;
+            }
 
-                sidebar.toggleClass('collapsed');
-                mainContent.toggleClass('expanded');
+            // Show loading overlay immediately
+            showLoading();
 
-                if (sidebar.hasClass('collapsed')) {
-                    toggleIcon.removeClass('fa-chevron-left').addClass('fa-chevron-right');
-                } else {
-                    toggleIcon.removeClass('fa-chevron-right').addClass('fa-chevron-left');
-                }
-            });
-
-            // Mobile menu functionality
-            $('#mobileMenuBtn').on('click', function() {
-                $('#sidebar').toggleClass('show');
-            });
-
-            // Close mobile menu when clicking on a link
-            $('.nav-link').on('click', function() {
-                if ($(window).width() <= 768) {
-                    $('#sidebar').removeClass('show');
-                }
-            });
-
-            // Form submission - FIXED VERSION
-            $('#analysisForm').on('submit', function(e) {
-                var tweet = $('#tweet').val().trim();
-                
-                if (tweet === "") {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Teks Kosong',
-                        text: 'Harap masukkan teks untuk dianalisis'
-                    });
-                    return;
-                }
-
-                // Show loading overlay immediately
-                $('#loadingOverlay').show();
-                
-                // Allow form to submit naturally - jangan block proses form
-                console.log('Form submitted, showing loading state...');
-                
-                // Disable button to prevent double submission
-                $('#prosesSentimen').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Memproses...');
-            });
-
-            // Auto-resize textarea
-            $('#tweet').on('input', function() {
-                this.style.height = 'auto';
-                this.style.height = (this.scrollHeight) + 'px';
-            });
-
-            // Handle window resize
-            $(window).on('resize', function() {
-                if ($(window).width() > 768) {
-                    $('#sidebar').removeClass('show');
-                }
-            });
-
-            // If there's an error from backend, hide loading
-            {% if hasil == '0' and error %}
-                $('#loadingOverlay').hide();
-                $('#prosesSentimen').prop('disabled', false).html('<i class="fas fa-search me-2"></i> Cek Kalimat');
-            {% endif %}
+            // Disable button to prevent double submission
+            $('#submitHateSpeechBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Memproses...');
         });
-    </script>
-</body>
-</html>
+
+        // Clear button
+        $('#clearHateSpeechBtn').on('click', function() {
+            Swal.fire({
+                title: 'Bersihkan Form?',
+                text: 'Semua data yang belum disimpan akan hilang.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Bersihkan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#keyword').val('');
+                    $('#category').val('');
+                    $('#intensity').val('');
+                    $('#target').val('');
+                    showTemporaryAlert('success', 'Form dibersihkan!', 'Semua input telah dihapus.');
+                }
+            });
+        });
+
+        // Success message if data was added successfully
+        {% if hasil == '2' %}
+        $(document).ready(function() {
+            // Hide loading overlay if it's still showing
+            hideLoading();
+            $('#submitHateSpeechBtn').prop('disabled', false).html('<i class="fas fa-plus-circle me-2"></i> Tambah ke Database');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: 'Kata ujaran kebencian berhasil ditambahkan ke database.',
+                confirmButtonColor: '#4a90e2'
+            });
+        });
+        {% endif %}
+    });
+</script>
+{% endblock %}

@@ -1,975 +1,243 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Unggah Berkas - Sistem Deteksi Ujaran Kebencian</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        :root {
-            --primary: #3b82f6;
-            --primary-dark: #1d4ed8;
-            --primary-light: #60a5fa;
-            --secondary: #6366f1;
-            --success: #10b981;
-            --info: #06b6d4;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --dark: #1f2937;
-            --light: #f8fafc;
-            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            --gradient-secondary: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            --gradient-glass: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(29, 78, 216, 0.1) 100%);
-            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--gradient-primary);
-            min-height: 100vh;
-            color: #374151;
-        }
-
-        .app-container {
-            min-height: 100vh;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Sidebar Styles */
-        .sidebar {
-            background: var(--gradient-primary);
-            color: white;
-            min-height: 100vh;
-            padding: 0;
-            box-shadow: var(--shadow-xl);
-            position: fixed;
-            width: 280px;
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar.collapsed {
-            width: 80px;
-        }
-
-        .sidebar-header {
-            padding: 2rem 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-        }
-
-        .sidebar-logo {
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .sidebar-title {
-            color: white;
-            font-weight: 700;
-            font-size: 1.2rem;
-            margin: 1rem 0 0.5rem;
-        }
-
-        .sidebar-subtitle {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.8rem;
-        }
-
-        .sidebar-menu {
-            padding: 1.5rem 0;
-        }
-
-        .nav-item {
-            margin-bottom: 0.5rem;
-        }
-
-        .nav-link {
-            color: rgba(255, 255, 255, 0.8);
-            padding: 1rem 1.5rem;
-            border-radius: 0;
-            border-left: 4px solid transparent;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            text-decoration: none;
-        }
-
-        .nav-link:hover {
-            color: white;
-            background: rgba(255, 255, 255, 0.1);
-            border-left-color: var(--primary-light);
-        }
-
-        .nav-link.active {
-            color: white;
-            background: rgba(255, 255, 255, 0.15);
-            border-left-color: var(--success);
-        }
-
-        .nav-link i {
-            width: 20px;
-            text-align: center;
-        }
-
-        .nav-text {
-            transition: opacity 0.3s ease;
-        }
-
-        .sidebar.collapsed .nav-text {
-            opacity: 0;
-            display: none;
-        }
-
-        .sidebar.collapsed .sidebar-title,
-        .sidebar.collapsed .sidebar-subtitle {
-            display: none;
-        }
-
-        .toggle-sidebar {
-            position: absolute;
-            top: 1rem;
-            right: -12px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 0.8rem;
-            box-shadow: var(--shadow-md);
-            transition: all 0.3s ease;
-        }
-
-        .toggle-sidebar:hover {
-            transform: scale(1.1);
-        }
-
-        /* Main Content */
-        .main-content {
-            margin-left: 280px;
-            transition: all 0.3s ease;
-            min-height: 100vh;
-        }
-
-        .main-content.expanded {
-            margin-left: 80px;
-        }
-
-        .app-container::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 300px;
-            background: var(--gradient-primary);
-            clip-path: polygon(0 0, 100% 0, 100% 70%, 0 100%);
-            z-index: 0;
-        }
-
-        /* Header Styles */
-        .main-header {
-            position: relative;
-            z-index: 10;
-            padding: 2rem 0 1rem;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .logo {
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .logo i {
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        .header-title {
-            color: white;
-            font-weight: 700;
-            font-size: 1.8rem;
-            margin: 0;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-subtitle {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
-            margin: 0;
-        }
-
-        /* User Info Card */
-        .user-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: var(--shadow-lg);
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            position: relative;
-            z-index: 10;
-            transition: all 0.3s ease;
-        }
-
-        .user-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-xl);
-        }
-
-        .user-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--gradient-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: white;
-            border: 3px solid white;
-            box-shadow: var(--shadow-md);
-        }
-
-        .user-info {
-            flex: 1;
-        }
-
-        .user-name {
-            font-weight: 600;
-            color: var(--dark);
-            margin: 0;
-        }
-
-        .user-email {
-            color: #6b7280;
-            font-size: 0.9rem;
-            margin: 0;
-        }
-
-        .login-badge {
-            background: var(--gradient-success);
-            color: white;
-            border: none;
-            font-size: 0.7rem;
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-        }
-
-        .logout-btn {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            border-radius: 12px;
-            padding: 0.5rem 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .logout-btn:hover {
-            background: var(--danger);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        /* Main Card */
-        .main-card {
-            background: white;
-            border-radius: 24px;
-            box-shadow: var(--shadow-xl);
-            border: none;
-            overflow: hidden;
-            margin-bottom: 2rem;
-            position: relative;
-            z-index: 10;
-            transition: all 0.3s ease;
-        }
-
-        .main-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-        }
-
-        .card-header-custom {
-            background: var(--gradient-primary);
-            color: white;
-            padding: 2rem;
-            border: none;
-        }
-
-        .card-title {
-            font-weight: 700;
-            font-size: 1.5rem;
-            margin: 0;
-        }
-
-        .card-subtitle {
-            opacity: 0.9;
-            font-size: 0.95rem;
-            margin: 0.5rem 0 0;
-        }
-
-        .card-body-custom {
-            padding: 2rem;
-        }
-
-        /* Form Styles */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: var(--dark);
-            margin-bottom: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-label i {
-            color: var(--primary);
-        }
-
-        .form-control-custom {
-            border: 2px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 1rem 1.2rem;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            background: #fafafa;
-        }
-
-        .form-control-custom:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-            background: white;
-            transform: translateY(-2px);
-        }
-
-        .form-select-custom {
-            border: 2px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 1rem 1.2rem;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            background: #fafafa;
-        }
-
-        .form-select-custom:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-            background: white;
-            transform: translateY(-2px);
-        }
-
-        .file-input-custom {
-            border: 2px dashed #e5e7eb;
-            border-radius: 16px;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            background: #fafafa;
-            cursor: pointer;
-        }
-
-        .file-input-custom:hover {
-            border-color: var(--primary);
-            background: #f8fafc;
-        }
-
-        .file-input-custom.dragover {
-            border-color: var(--primary);
-            background: rgba(59, 130, 246, 0.05);
-        }
-
-        /* Buttons */
-        .btn-custom-primary {
-            background: var(--gradient-primary);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            padding: 1rem 2.5rem;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn-custom-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-lg);
-            color: white;
-            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-        }
-
-        .btn-custom-secondary {
-            background: white;
-            color: #6b7280;
-            border: 2px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 1rem 2rem;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .btn-custom-secondary:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        /* Table Styles */
-        .table-custom {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: var(--shadow-md);
-            margin-top: 1rem;
-        }
-
-        .table-custom thead th {
-            background: var(--gradient-primary);
-            color: white;
-            border: none;
-            padding: 1.2rem;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .table-custom tbody td {
-            padding: 1.2rem;
-            border-color: #f3f4f6;
-            vertical-align: middle;
-        }
-
-        .table-custom tbody tr:hover {
-            background-color: #f8fafc;
-        }
-
-        /* Results Card */
-        .result-card {
-            background: var(--gradient-glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-        }
-
-        /* Badge Styles */
-        .badge-custom {
-            font-size: 0.75rem;
-            padding: 0.4rem 0.8rem;
-            border-radius: 12px;
-            margin: 0.1rem;
-        }
-
-        .badge-success {
-            background: var(--gradient-success);
-            color: white;
-        }
-
-        .badge-warning {
-            background: var(--gradient-warning);
-            color: white;
-        }
-
-        .badge-info {
-            background: var(--gradient-primary);
-            color: white;
-        }
-
-        .badge-danger {
-            background: var(--gradient-warning);
-            color: white;
-        }
-
-        /* Loading Overlay */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            backdrop-filter: blur(5px);
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3b82f6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Mobile Menu Button */
-        .mobile-menu-btn {
-            display: none;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 0.75rem 1rem;
-            font-size: 1.2rem;
-            position: fixed;
-            top: 1rem;
-            left: 1rem;
-            z-index: 1002;
-            box-shadow: var(--shadow-lg);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                transform: translateX(-100%);
-                z-index: 1001;
-            }
-
-            .sidebar.show {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0 !important;
-            }
-
-            .main-header {
-                padding: 1rem 0;
-            }
-
-            .header-title {
-                font-size: 1.4rem;
-            }
-
-            .card-body-custom {
-                padding: 1.5rem;
-            }
-
-            .btn-custom-primary,
-            .btn-custom-secondary {
-                width: 100%;
-                margin-bottom: 1rem;
-            }
-
-            .mobile-menu-btn {
-                display: block !important;
-            }
-
-            .table-responsive {
-                font-size: 0.8rem;
-            }
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-dark);
-        }
-    </style>
-</head>
-<body>
-    <!-- Mobile Menu Button -->
-    <button class="mobile-menu-btn" id="mobileMenuBtn">
-        <i class="fas fa-bars"></i>
-    </button>
-
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <button class="toggle-sidebar" id="toggleSidebar">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-
-        <div class="sidebar-header">
-            <div class="sidebar-logo floating">
-                <i class="fas fa-shield-alt"></i>
-            </div>
-            <h3 class="sidebar-title">SISTEM DETEKSI UJARAN KEBENCIAN</h3>
-            <p class="sidebar-subtitle">Sistem Analisis Ujaran Kebencian</p>
-        </div>
-
-        <div class="sidebar-menu">
-            <!-- DASHBOARD HARUS DI DALAM sidebar-menu -->
-            <div class="nav-item">
-                <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' or request.endpoint == 'tambahDash' %}active{% endif %}">
-                    <i class="fas fa-home"></i>
-                    <span class="nav-text">Dashboard</span>
-                </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' or request.endpoint == 'cekSentimenAnalysis' %}active{% endif %}">
-                    <i class="fas fa-search"></i>
-                    <span class="nav-text">Sistem Pengujian</span>
-                </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="{{ url_for('batch') }}" class="nav-link {% if request.endpoint == 'batch' or request.endpoint == 'cekBatch' %}active{% endif %}">
-                    <i class="fas fa-layer-group"></i>
-                    <span class="nav-text">Unggah Berkas</span>
-                </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="{{ url_for('kirimData') }}" class="nav-link {% if request.endpoint == 'kirimData' %}active{% endif %}">
-                    <i class="fas fa-upload"></i>
-                    <span class="nav-text">Kirim Data</span>
-                </a>
-            </div>
-
-            {% if session.get('logged_in') %}
-            <div class="nav-item mt-4">
-                <a href="{{ url_for('logout') }}" class="nav-link">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span class="nav-text">Logout</span>
-                </a>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content" id="mainContent">
-        <div class="app-container">
-            <div class="container-fluid py-4">
-                <!-- Header -->
-                <div class="row main-header">
-                    <div class="col-12">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="logo-container">
-                                <div class="logo floating">
-                                    <i class="fas fa-shield-alt"></i>
-                                </div>
-                                <div>
-                                    <h1 class="header-title">Hate Speech Detector</h1>
-                                    <p class="header-subtitle">Analisis Ujaran Kebencian Batch</p>
-                                </div>
-                            </div>
-                            <div class="d-none d-md-flex align-items-center gap-3">
-                                <span class="text-white-50">v2.0</span>
-                                <div class="bg-white-20 rounded-pill px-3 py-1">
-                                    <small class="text-white">
-                                        <i class="fas fa-circle text-success me-1"></i>
-                                        Online
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
+{% extends "base.html" %}
+
+{% block title %}Unggah Berkas - Sistem Deteksi Ujaran Kebencian{% endblock %}
+
+{% block header_title %}Hate Speech Detector{% endblock %}
+{% block header_subtitle %}Analisis Ujaran Kebencian Batch{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Main Form Card -->
+    <div class="row justify-content-center">
+        <div class="col-xl-12 col-lg-12">
+            <div class="main-card">
+                <div class="card-header-custom">
+                    <div class="text-center">
+                        <h2 class="card-title">
+                            <i class="fab fa-twitter me-2"></i> Prediksi Data Batch
+                        </h2>
+                        <p class="card-subtitle">
+                            Analisis multiple teks sekaligus melalui unggah berkas CSV
+                        </p>
                     </div>
                 </div>
-
-                <!-- User Info Card (if logged in) -->
-                {% if session.get('logged_in') %}
-                <div class="row">
-                    <div class="col-12">
-                        <div class="user-card">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center gap-3">
-                                    {% if session.get('picture') %}
-                                    <img src="{{ session.picture }}" alt="Profile" class="user-avatar" />
-                                    {% else %}
-                                    <div class="user-avatar">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    {% endif %}
-                                    <div class="user-info">
-                                        <h3 class="user-name">{{ session.get('name', 'User') }}</h3>
-                                        <p class="user-email">{{ session.get('email', '') }}</p>
-                                        <span class="login-badge">
-                                            {% if 'gmail.com' in session.get('email', '') or 'google' in session.get('email', '') %}
-                                            <i class="fab fa-google me-1"></i> Google Login 
-                                            {% else %}
-                                            <i class="fas fa-key me-1"></i> Manual Login 
-                                            {% endif %}
-                                        </span>
-                                    </div>
-                                </div>
-                                <a href="{{ url_for('logout') }}" class="logout-btn">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Main Form Card -->
-                <div class="row justify-content-center">
-                    <div class="col-xl-12 col-lg-12">
-                        <div class="main-card">
-                            <div class="card-header-custom">
-                                <div class="text-center">
-                                    <h2 class="card-title">
-                                        <i class="fas fa-layer-group me-2"></i> Prediksi Data Batch
-                                    </h2>
-                                    <p class="card-subtitle">
-                                        Analisis multiple teks sekaligus melalui unggah berkas CSV
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="card-body-custom">
-                                <form action="{{ url_for('cekBatch')}}" method="POST" enctype="multipart/form-data" id="batchForm">
-                                    {{ form.csrf_token }}
-                                    <div class="row">
-                                        <div class="col-lg-5 col-md-12 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">
-                                                    <i class="fas fa-file-csv"></i>
-                                                    Unggah Berkas CSV
-                                                </label>
-                                                <div class="file-input-custom" id="fileDropArea">
-                                                    <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
-                                                    <h5 class="text-primary">Drop file di sini atau klik untuk memilih</h5>
-                                                    <p class="text-muted mb-2">Format: CSV dengan kolom 'tweet'</p>
-                                                    <input class="form-control-custom d-none" type="file" name="batchSentimen" id="batchSentimen" accept=".csv" required>
-                                                    <button type="button" class="btn-custom-secondary mt-2" onclick="document.getElementById('batchSentimen').click()">
-                                                        <i class="fas fa-folder-open me-2"></i>Pilih File
-                                                    </button>
-                                                    <div id="fileName" class="mt-2 text-success fw-bold"></div>
-                                                </div>
-                                                <div class="form-text text-muted mt-2">
-                                                    <i class="fas fa-info-circle me-1"></i>
-                                                    *Hanya support CSV (maksimal 50 baris data)
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-3 col-md-6 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">
-                                                    <i class="fas fa-brain"></i>
-                                                    Pilih Model
-                                                </label>
-                                                <select name="model" id="model" class="form-select-custom" required>
-                                                    <option value="">Pilih Model</option>
-                                                    <option value="CNN" {% if model == "CNN" %} selected {% endif %}>FuSE-CNN</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-2 col-md-6 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">
-                                                    <i class="fas fa-expand-alt"></i>
-                                                    Model Perluasan
-                                                </label>
-                                                <select name="perluasan" id="perluasan" class="form-select-custom" required>
-                                                    <option value="">--- Pilih ---</option>
-                                                    <option value="0" {% if perluasan == "0" %} selected {% endif %}>Tidak</option>
-                                                    <option value="1" {% if perluasan == "1" %} selected {% endif %}>Iya</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-2 col-md-12 mb-3 d-flex align-items-end">
-                                            <button type="submit" id="prosesSentimen" class="btn-custom-primary w-100">
-                                                <i class="fas fa-search me-2"></i> Proses Batch
+                <div class="card-body-custom">
+                    <form action="{{ url_for('cekBatch')}}" method="POST" enctype="multipart/form-data" id="batchForm">
+                        {{ form.csrf_token }}
+                        
+                        <!-- Upload CSV Section - Full Width -->
+                        <div class="row">
+                            <div class="col-12 mb-4">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-file-csv"></i>
+                                        Unggah Berkas CSV
+                                    </label>
+                                    <div class="file-input-custom-large" id="fileDropArea">
+                                        <div class="file-input-content">
+                                            <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                            <h5 class="text-primary">Drop file di sini atau klik untuk memilih</h5>
+                                            <p class="text-muted mb-2">Format: CSV dengan kolom 'tweet' (maksimal 50 baris data)</p>
+                                            <input class="form-control-custom d-none" type="file" name="batchSentimen" id="batchSentimen" accept=".csv" required>
+                                            <button type="button" class="btn-custom-secondary mt-2" onclick="document.getElementById('batchSentimen').click()">
+                                                <i class="fas fa-folder-open me-2"></i>Pilih File CSV
                                             </button>
                                         </div>
+                                        <div id="fileName" class="file-name-display mt-3"></div>
                                     </div>
-                                </form>
-
-                                <!-- Results Section -->
-                                {% if hasil=='1' %}
-                                <div class="row mt-4">
-                                    <div class="col-12">
-                                        <div class="result-card">
-                                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                                <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Hasil Analisis Batch</h4>
-                                                {% if download_file %}
-                                                <a href="{{ url_for('download_batch', filename=download_file) }}" class="btn-custom-primary">
-                                                    <i class="fas fa-download me-2"></i>Download Hasil
-                                                </a>
-                                                {% endif %}
-                                            </div>
-                                            <div class="table-responsive">
-                                                <table class="table table-custom">
-                                                    <thead>
-                                                        <tr>
-                                                            <th style="width: 30%">Kalimat</th>
-                                                            <th style="width: 70%">Hasil Prediksi</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {% for index in range(dictData['tweet']|length) %}
-                                                        <tr>
-                                                            <td class="fw-bold">{{ dictData['normalize'][index] }}</td>
-                                                            <td>
-                                                                <div class="d-flex flex-wrap gap-1">
-                                                                    {% if dictData['Non_HS'][index] == 1 %}
-                                                                        <span class="badge-custom badge-success">Bukan Ujaran Kebencian ({{ "{:.0f}%".format(dictData['Non_HS_Persen'][index]) }})</span>
-                                                                    {% endif %}
-                                                                    
-                                                                    {% if dictData['HS'][index] == 1 %}
-                                                                        <span class="badge-custom badge-danger">Ujaran Kebencian ({{ "{:.0f}%".format(dictData['HS_Persen'][index]) }})</span>
-                                                                    {% endif %}
-                                                                    
-                                                                    {% if dictData['Abusive'][index] == 1 %}
-                                                                        <span class="badge-custom badge-warning">Kata Kasar ({{ "{:.0f}%".format(dictData['Abusive_Persen'][index]) }})</span>
-                                                                    {% endif %}
-                                                                    
-                                                                    {% if dictData['HS_individual'][index] == 1 %}
-                                                                        <span class="badge-custom badge-info">Target - Individu ({{ "{:.0f}%".format(dictData['HS_individual_Persen'][index]) }})</span>
-                                                                    {% endif %}
-                                                                    {% if dictData['HS_Group'][index] == 1 %}
-                                                                        <span class="badge-custom badge-info">Target - Kelompok ({{ "{:.0f}%".format(dictData['HS_Group_Persen'][index]) }})</span>
-                                                                    {% endif %}
-
-                                                                    {% if dictData['HS_Religion'][index] == 1 %}
-                                                                        <span class="badge-custom badge-warning">Kategori - Agama ({{ "{:.0f}%".format(dictData['HS_Religion_Persen'][index]) }})</span>
-                                                                    {% endif %}
-                                                                    {% if dictData['HS_Race'][index] == 1 %}
-                                                                        <span class="badge-custom badge-warning">Kategori - Ras ({{ "{:.0f}%".format(dictData['HS_Race_Persen'][index]) }})</span>
-                                                                    {% endif %}
-                                                                    {% if dictData['HS_Physical'][index] == 1 %}
-                                                                        <span class="badge-custom badge-warning">Kategori - Fisik ({{ "{:.0f}%".format(dictData['HS_Physical_Persen'][index]) }})</span>
-                                                                    {% endif %}
-                                                                    {% if dictData['HS_Gender'][index] == 1 %}
-                                                                        <span class="badge-custom badge-warning">Kategori - Gender ({{ "{:.0f}%".format(dictData['HS_Gender_Persen'][index]) }})</span>
-                                                                    {% endif %}
-                                                                    {% if dictData['HS_Other'][index] == 1 %}
-                                                                        <span class="badge-custom badge-warning">Kategori - Lainnya ({{ "{:.0f}%".format(dictData['HS_Other_Persen'][index]) }})</span>
-                                                                    {% endif %}
-
-                                                                    {% if dictData['HS_Weak'][index] == 1 %}
-                                                                        <span class="badge-custom badge-info">Level - Lemah ({{ "{:.0f}%".format(dictData['HS_Weak_Persen'][index]) }})</span>
-                                                                    {% endif %}
-                                                                    {% if dictData['HS_Moderate'][index] == 1 %}
-                                                                        <span class="badge-custom badge-warning">Level - Sedang ({{ "{:.0f}%".format(dictData['HS_Moderate_Persen'][index]) }})</span>
-                                                                    {% endif %}
-                                                                    {% if dictData['HS_Strong'][index] == 1 %}
-                                                                        <span class="badge-custom badge-danger">Level - Kuat ({{ "{:.0f}%".format(dictData['HS_Strong_Persen'][index]) }})</span>
-                                                                    {% endif %}
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                        {% endfor %}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
+                                    <div class="form-text-custom mt-2">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        *Hanya support file CSV dengan maksimal 50 baris data
                                     </div>
                                 </div>
-                                {% endif %}
+                            </div>
+                        </div>
 
-                                {% if error %}
-                                <div class="row mt-4">
-                                    <div class="col-12">
-                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                            <i class="fas fa-exclamation-triangle me-2"></i>
-                                            <strong>Error:</strong> {{ error }}
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                        </div>
+                        <!-- Options Section - Below Upload -->
+                        <div class="row">
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div class="form-group option-card">
+                                    <label class="form-label">
+                                        <i class="fas fa-brain"></i>
+                                        Pilih Model
+                                    </label>
+                                    <select name="model" id="model" class="form-select-custom" required>
+                                        <option value="">Pilih Model</option>
+                                        <option value="CNN" {% if model == "CNN" %} selected {% endif %}>FuSE-CNN</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div class="form-group option-card">
+                                    <label class="form-label">
+                                        <i class="fas fa-expand-alt"></i>
+                                        Model Perluasan
+                                    </label>
+                                    <select name="perluasan" id="perluasan" class="form-select-custom" required>
+                                        <option value="">--- Pilih ---</option>
+                                        <option value="0" {% if perluasan == "0" %} selected {% endif %}>Tidak</option>
+                                        <option value="1" {% if perluasan == "1" %} selected {% endif %}>Iya</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-12 mb-3">
+                                <div class="form-group option-card">
+                                    <label class="form-label">
+                                        <i class="fas fa-cog"></i>
+                                        Opsi Tambahan
+                                    </label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" name="perluasanKalimat" id="perluasanKalimat" checked>
+                                        <label class="form-check-label" for="perluasanKalimat">Perluasan Kalimat</label>
+                                    </div>
+                                    <div class="form-text-custom-small">
+                                        Aktifkan untuk memperluas kalimat otomatis
                                     </div>
                                 </div>
-                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="row mt-4">
+                            <div class="col-12 text-center">
+                                <button type="submit" id="prosesSentimen" class="btn-custom-primary me-3">
+                                    <i class="fas fa-play-circle me-2"></i> Proses Batch
+                                </button>
+                                <button type="button" class="btn-custom-secondary" id="clearFormBtn">
+                                    <i class="fas fa-eraser me-2"></i> Bersihkan Form
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Results Section -->
+                    {% if hasil=='1' %}
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="result-card">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Hasil Analisis Batch</h4>
+                                    {% if download_file %}
+                                    <a href="{{ url_for('download_batch', filename=download_file) }}" class="btn-custom-primary">
+                                        <i class="fas fa-download me-2"></i>Download Hasil
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-custom">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 30%">Kalimat</th>
+                                                <th style="width: 70%">Hasil Prediksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for index in range(dictData['tweet']|length) %}
+                                            <tr>
+                                                <td class="fw-bold">{{ dictData['normalize'][index] }}</td>
+                                                <td>
+                                                    <div class="d-flex flex-wrap gap-1">
+                                                        {% if dictData['Non_HS'][index] == 1 %}
+                                                            <span class="badge-custom badge-success">Bukan Ujaran Kebencian ({{ "{:.0f}%".format(dictData['Non_HS_Persen'][index]) }})</span>
+                                                        {% endif %}
+                                                        
+                                                        {% if dictData['HS'][index] == 1 %}
+                                                            <span class="badge-custom badge-danger">Ujaran Kebencian ({{ "{:.0f}%".format(dictData['HS_Persen'][index]) }})</span>
+                                                        {% endif %}
+                                                        
+                                                        {% if dictData['Abusive'][index] == 1 %}
+                                                            <span class="badge-custom badge-warning">Kata Kasar ({{ "{:.0f}%".format(dictData['Abusive_Persen'][index]) }})</span>
+                                                        {% endif %}
+                                                        
+                                                        {% if dictData['HS_individual'][index] == 1 %}
+                                                            <span class="badge-custom badge-info">Target - Individu ({{ "{:.0f}%".format(dictData['HS_individual_Persen'][index]) }})</span>
+                                                        {% endif %}
+                                                        {% if dictData['HS_Group'][index] == 1 %}
+                                                            <span class="badge-custom badge-info">Target - Kelompok ({{ "{:.0f}%".format(dictData['HS_Group_Persen'][index]) }})</span>
+                                                        {% endif %}
+
+                                                        {% if dictData['HS_Religion'][index] == 1 %}
+                                                            <span class="badge-custom badge-warning">Kategori - Agama ({{ "{:.0f}%".format(dictData['HS_Religion_Persen'][index]) }})</span>
+                                                        {% endif %}
+                                                        {% if dictData['HS_Race'][index] == 1 %}
+                                                            <span class="badge-custom badge-warning">Kategori - Ras ({{ "{:.0f}%".format(dictData['HS_Race_Persen'][index]) }})</span>
+                                                        {% endif %}
+                                                        {% if dictData['HS_Physical'][index] == 1 %}
+                                                            <span class="badge-custom badge-warning">Kategori - Fisik ({{ "{:.0f}%".format(dictData['HS_Physical_Persen'][index]) }})</span>
+                                                        {% endif %}
+                                                        {% if dictData['HS_Gender'][index] == 1 %}
+                                                            <span class="badge-custom badge-warning">Kategori - Gender ({{ "{:.0f}%".format(dictData['HS_Gender_Persen'][index]) }})</span>
+                                                        {% endif %}
+                                                        {% if dictData['HS_Other'][index] == 1 %}
+                                                            <span class="badge-custom badge-warning">Kategori - Lainnya ({{ "{:.0f}%".format(dictData['HS_Other_Persen'][index]) }})</span>
+                                                        {% endif %}
+
+                                                        {% if dictData['HS_Weak'][index] == 1 %}
+                                                            <span class="badge-custom badge-info">Level - Lemah ({{ "{:.0f}%".format(dictData['HS_Weak_Persen'][index]) }})</span>
+                                                        {% endif %}
+                                                        {% if dictData['HS_Moderate'][index] == 1 %}
+                                                            <span class="badge-custom badge-warning">Level - Sedang ({{ "{:.0f}%".format(dictData['HS_Moderate_Persen'][index]) }})</span>
+                                                        {% endif %}
+                                                        {% if dictData['HS_Strong'][index] == 1 %}
+                                                            <span class="badge-custom badge-danger">Level - Kuat ({{ "{:.0f}%".format(dictData['HS_Strong_Persen'][index]) }})</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                    {% endif %}
 
-                <!-- Information Card -->
-                <div class="row justify-content-center">
-                    <div class="col-xl-12 col-lg-12">
-                        <div class="main-card">
-                            <div class="card-header-custom">
-                                <div class="text-center">
-                                    <h2 class="card-title">
-                                        <i class="fas fa-info-circle me-2"></i> Ketentuan Penggunaan
-                                    </h2>
-                                </div>
+                    {% if error %}
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Error:</strong> {{ error }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
-                            <div class="card-body-custom">
-                                <div class="row">
-                                    <div class="col-md-8 mx-auto text-center">
-                                        <p class="lead mb-4">
-                                            Berkas harus berisi <strong>satu kolom</strong> dengan nama <strong>tweet</strong>, 
-                                            dengan maksimal <strong>50 baris</strong> data.
-                                        </p>
-                                        <div class="alert alert-info">
-                                            <i class="fas fa-download me-2"></i>
-                                            <strong>Download Template:</strong> 
-                                            <a href="https://drive.google.com/file/d/1yF3PqRiEx9Uggccfyj97UOwOLET2s_Bt/view?usp=sharing" 
-                                               target="_blank" class="alert-link">Klik di sini untuk mengunduh format CSV</a>
-                                        </div>
-                                        <div class="mt-3">
-                                            <small class="text-muted">
-                                                <i class="fas fa-lightbulb me-1"></i>
-                                                Proses batch membutuhkan waktu lebih lama tergantung jumlah data yang diunggah
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Information Card -->
+    <div class="row justify-content-center">
+        <div class="col-xl-12 col-lg-12">
+            <div class="main-card">
+                <div class="card-header-custom">
+                    <div class="text-center">
+                        <h2 class="card-title">
+                            <i class="fas fa-info-circle me-2"></i> Ketentuan Penggunaan
+                        </h2>
+                    </div>
+                </div>
+                <div class="card-body-custom">
+                    <div class="row">
+                        <div class="col-md-8 mx-auto text-center">
+                            <p class="lead mb-4">
+                                Berkas harus berisi <strong>satu kolom</strong> dengan nama <strong>tweet</strong>, 
+                                dengan maksimal <strong>50 baris</strong> data.
+                            </p>
+                            <div class="info-alert">
+                                <i class="fas fa-download me-2"></i>
+                                <strong>Download Template:</strong> 
+                                <a href="https://drive.google.com/file/d/1yF3PqRiEx9Uggccfyj97UOwOLET2s_Bt/view?usp=sharing" 
+                                   target="_blank" class="alert-link">Klik di sini untuk mengunduh format CSV</a>
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-lightbulb me-1"></i>
+                                    Proses batch membutuhkan waktu lebih lama tergantung jumlah data yang diunggah
+                                </small>
                             </div>
                         </div>
                     </div>
@@ -977,159 +245,417 @@
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
-        <div class="text-center">
-            <div class="loading-spinner mb-3"></div>
-            <h4 class="text-white">Memproses Analisis Batch...</h4>
-            <p class="text-white-50">Tunggu sebentar, sistem sedang menganalisis data batch</p>
-            <small class="text-white-50">Proses ini membutuhkan waktu lebih lama</small>
-        </div>
-    </div>
+<style>
+    /* CSS untuk konsistensi design */
+    .card-header-custom {
+        background-color: #4a90e2;
+        color: white;
+        padding: 25px;
+    }
+    
+    .card-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    
+    .card-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    
+    .main-card {
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .card-body-custom {
+        padding: 30px;
+    }
+    
+    /* File Upload Area - Full Width */
+    .file-input-custom-large {
+        border: 3px dashed #e5e7eb;
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: #fafafa;
+        cursor: pointer;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    .file-input-custom-large:hover {
+        border-color: #4a90e2;
+        background: #f8fafc;
+        transform: translateY(-2px);
+    }
 
-    <script>
-        // Initialize Application
-        $(document).ready(function() {
-            console.log('🚀 Batch Analysis Initialized');
+    .file-input-custom-large.dragover {
+        border-color: #4a90e2;
+        background: rgba(74, 144, 226, 0.05);
+    }
 
-            // Sidebar toggle functionality
-            $('#toggleSidebar').on('click', function() {
-                const sidebar = $('#sidebar');
-                const mainContent = $('#mainContent');
-                const toggleIcon = $('#toggleSidebar i');
+    .file-input-content {
+        max-width: 500px;
+    }
 
-                sidebar.toggleClass('collapsed');
-                mainContent.toggleClass('expanded');
+    .file-name-display {
+        background: #e8f5e8;
+        border: 1px solid #4caf50;
+        border-radius: 8px;
+        padding: 12px 20px;
+        font-weight: 600;
+        color: #2e7d32;
+        display: inline-block;
+    }
 
-                if (sidebar.hasClass('collapsed')) {
-                    toggleIcon.removeClass('fa-chevron-left').addClass('fa-chevron-right');
-                } else {
-                    toggleIcon.removeClass('fa-chevron-right').addClass('fa-chevron-left');
-                }
-            });
+    /* Option Cards */
+    .option-card {
+        background-color: #ffffff;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        height: 100%;
+        transition: all 0.3s;
+        border: 1px solid #f1f5f9;
+    }
+    
+    .option-card:hover {
+        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        transform: translateY(-3px);
+        border-color: #e2e8f0;
+    }
+    
+    /* Form Controls */
+    .form-select-custom {
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        font-size: 15px;
+        background-color: #ffffff;
+        transition: all 0.3s;
+    }
+    
+    .form-select-custom:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        outline: none;
+    }
+    
+    .form-check-input:checked {
+        background-color: #4a90e2;
+        border-color: #4a90e2;
+    }
+    
+    /* Buttons */
+    .btn-custom-primary {
+        background-color: #4a90e2;
+        border: none;
+        padding: 14px 35px;
+        font-size: 16px;
+        border-radius: 8px;
+        color: white;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+    
+    .btn-custom-primary:hover {
+        background-color: #3a7bc8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .btn-custom-secondary {
+        background-color: #6b7280;
+        border: none;
+        padding: 14px 35px;
+        font-size: 16px;
+        border-radius: 8px;
+        color: white;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+    
+    .btn-custom-secondary:hover {
+        background-color: #4b5563;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    /* Form Labels and Text */
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 10px;
+        display: block;
+        font-size: 15px;
+    }
+    
+    .form-text-custom {
+        color: #6b7280;
+        font-size: 13px;
+        margin-top: 8px;
+        font-style: italic;
+    }
+    
+    .form-text-custom-small {
+        color: #6b7280;
+        font-size: 12px;
+        margin-top: 6px;
+        font-style: italic;
+    }
+    
+    /* Info Alert */
+    .info-alert {
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        border: 1px solid #bae6fd;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    /* Table Styling */
+    .table-custom {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .table-custom th {
+        background-color: #f8fafc;
+        padding: 15px;
+        font-weight: 600;
+        color: #4a5568;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .table-custom td {
+        padding: 15px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    /* Badge Styles */
+    .badge-custom {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.8rem;
+        border-radius: 12px;
+        margin: 0.1rem;
+        font-weight: 500;
+    }
 
-            // Mobile menu functionality
-            $('#mobileMenuBtn').on('click', function() {
-                $('#sidebar').toggleClass('show');
-            });
+    .badge-success {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+    }
 
-            // Close mobile menu when clicking on a link
-            $('.nav-link').on('click', function() {
-                if ($(window).width() <= 768) {
-                    $('#sidebar').removeClass('show');
-                }
-            });
+    .badge-warning {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+    }
 
-            // File input handling
-            $('#batchSentimen').on('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    $('#fileName').html(`<i class="fas fa-file-csv me-2"></i>${file.name}`);
-                    $('#fileDropArea').addClass('border-success');
-                }
-            });
+    .badge-info {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+    }
 
-            // Drag and drop functionality
-            const fileDropArea = document.getElementById('fileDropArea');
-            const fileInput = document.getElementById('batchSentimen');
+    .badge-danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+    }
 
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                fileDropArea.addEventListener(eventName, preventDefaults, false);
-            });
+    .result-card {
+        background-color: #ffffff;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        margin-top: 20px;
+    }
 
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
+    @media (max-width: 768px) {
+        .card-body-custom {
+            padding: 25px;
+        }
+        
+        .card-header-custom {
+            padding: 25px 20px;
+        }
+        
+        .card-title {
+            font-size: 1.6rem;
+        }
+        
+        .btn-custom-primary,
+        .btn-custom-secondary {
+            width: 100%;
+            margin-bottom: 12px;
+            margin-right: 0 !important;
+        }
+        
+        .file-input-custom-large {
+            padding: 2rem 1rem;
+            min-height: 150px;
+        }
+        
+        .option-card {
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+    }
+</style>
+{% endblock %}
 
-            ['dragenter', 'dragover'].forEach(eventName => {
-                fileDropArea.addEventListener(eventName, highlight, false);
-            });
+{% block extra_js %}
+<script>
+    // Batch specific JavaScript
+    $(document).ready(function() {
+        console.log('🚀 Batch Analysis Initialized');
 
-            ['dragleave', 'drop'].forEach(eventName => {
-                fileDropArea.addEventListener(eventName, unhighlight, false);
-            });
-
-            function highlight() {
-                fileDropArea.classList.add('dragover');
-            }
-
-            function unhighlight() {
-                fileDropArea.classList.remove('dragover');
-            }
-
-            fileDropArea.addEventListener('drop', handleDrop, false);
-
-            function handleDrop(e) {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                fileInput.files = files;
-                $('#fileName').html(`<i class="fas fa-file-csv me-2"></i>${files[0].name}`);
+        // File input handling
+        $('#batchSentimen').on('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                $('#fileName').html(`<i class="fas fa-file-csv me-2"></i>${file.name} (${(file.size / 1024).toFixed(2)} KB)`);
                 $('#fileDropArea').addClass('border-success');
             }
-
-            // Form submission
-            $('#batchForm').on('submit', function(e) {
-                const file = $('#batchSentimen').val();
-                const model = $('#model').val();
-                const perluasan = $('#perluasan').val();
-                
-                if (!file) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'File Belum Dipilih',
-                        text: 'Harap pilih file CSV untuk dianalisis'
-                    });
-                    return;
-                }
-
-                if (!model) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Model Belum Dipilih',
-                        text: 'Harap pilih model yang akan digunakan'
-                    });
-                    return;
-                }
-
-                if (!perluasan) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Opsi Perluasan Belum Dipilih',
-                        text: 'Harap pilih opsi perluasan model'
-                    });
-                    return;
-                }
-
-                // Show loading overlay immediately
-                $('#loadingOverlay').show();
-                
-                // Disable button to prevent double submission
-                $('#prosesSentimen').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Memproses...');
-            });
-
-            // Handle window resize
-            $(window).on('resize', function() {
-                if ($(window).width() > 768) {
-                    $('#sidebar').removeClass('show');
-                }
-            });
-
-            // If there's an error from backend, hide loading
-            {% if error %}
-                $('#loadingOverlay').hide();
-                $('#prosesSentimen').prop('disabled', false).html('<i class="fas fa-search me-2"></i> Proses Batch');
-            {% endif %}
         });
-    </script>
-</body>
-</html>
+
+        // Clear form button
+        $('#clearFormBtn').on('click', function() {
+            Swal.fire({
+                title: 'Bersihkan Form?',
+                text: 'Semua input dan file yang dipilih akan dihapus.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Bersihkan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#batchSentimen').val('');
+                    $('#fileName').empty();
+                    $('#model').val('');
+                    $('#perluasan').val('');
+                    $('#fileDropArea').removeClass('border-success');
+                    showTemporaryAlert('success', 'Form dibersihkan!', 'Semua input telah direset.');
+                }
+            });
+        });
+
+        // Drag and drop functionality
+        const fileDropArea = document.getElementById('fileDropArea');
+        const fileInput = document.getElementById('batchSentimen');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileDropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileDropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileDropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            fileDropArea.classList.add('dragover');
+        }
+
+        function unhighlight() {
+            fileDropArea.classList.remove('dragover');
+        }
+
+        fileDropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                $('#fileName').html(`<i class="fas fa-file-csv me-2"></i>${files[0].name} (${(files[0].size / 1024).toFixed(2)} KB)`);
+                $('#fileDropArea').addClass('border-success');
+            }
+        }
+
+        // Form submission
+        $('#batchForm').on('submit', function(e) {
+            const file = $('#batchSentimen').val();
+            const model = $('#model').val();
+            const perluasan = $('#perluasan').val();
+            
+            if (!file) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'File Belum Dipilih',
+                    text: 'Harap pilih file CSV untuk dianalisis'
+                });
+                return;
+            }
+
+            if (!model) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Model Belum Dipilih',
+                    text: 'Harap pilih model yang akan digunakan'
+                });
+                return;
+            }
+
+            if (!perluasan) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Opsi Perluasan Belum Dipilih',
+                    text: 'Harap pilih opsi perluasan model'
+                });
+                return;
+            }
+
+            // Show loading overlay immediately
+            showLoading();
+            
+            // Disable button to prevent double submission
+            $('#prosesSentimen').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Memproses...');
+        });
+
+        // If there's an error from backend, hide loading
+        {% if error %}
+            hideLoading();
+            $('#prosesSentimen').prop('disabled', false).html('<i class="fas fa-play-circle me-2"></i> Proses Batch');
+        {% endif %}
+    });
+
+    // Utility function for temporary alerts
+    function showTemporaryAlert(type, title, message) {
+        Swal.fire({
+            icon: type,
+            title: title,
+            text: message,
+            timer: 3000,
+            showConfirmButton: false
+        });
+    }
+</script>
+{% endblock %}

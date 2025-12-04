@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hasil Deteksi</title>
+</head>
+<body>
+    <h2>Hasil Deteksi Slang</h2>
+    <p><b>Teks asli:</b> {{ text }}</p>
+
+    {% if suggestions %}
+        <h3>Kata Tidak Baku Ditemukan:</h3>
+        <ul>
+        {% for slang, options in suggestions.items() %}
+            <li>
+                <b>{{ slang }}</b> →
+                {% if options %}
+                    <form action="/update" method="post" style="display:inline;">
+                        <select name="correct">
+                            {% for opt in options %}
+                                <option value="{{ opt }}">{{ opt }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="hidden" name="slang" value="{{ slang }}">
+                        <button type="submit">Simpan</button>
+                    </form>
+                {% else %}
+                    (tidak ada saran)
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>✅ Tidak ada kata slang yang terdeteksi.</p>
+    {% endif %}
+
+    <a href="/">← Kembali</a>
+</body>
+</html>

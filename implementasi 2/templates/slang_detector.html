@@ -1,0 +1,862 @@
+{% extends "base.html" %}
+
+{% block title %}Deteksi Kata Tidak Baku & Slang{% endblock %}
+
+{% block header_title %}Deteksi Kata Tidak Baku{% endblock %}
+{% block header_subtitle %}Sistem Normalisasi Kata Slang ke Bahasa Baku{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Main Detection Card -->
+    <div class="row justify-content-center">
+        <div class="col-xl-12 col-lg-12">
+            <div class="main-card">
+                <div class="card-header-custom">
+                    <div class="text-center">
+                        <h2 class="card-title">
+                            <i class="fab fa-twitter me-2"></i> Deteksi Kata Tidak Baku
+                        </h2>
+                        <p class="card-subtitle">
+                            Masukkan teks untuk dideteksi kata-kata slang dan tidak bakunya
+                        </p>
+                    </div>
+                </div>
+                <div class="card-body-custom">
+                    <!-- Info Alert -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="info-alert">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-info-circle alert-icon me-3"></i>
+                                    <div class="flex-grow-1">
+                                        <strong class="d-block mb-1">Cara Kerja Sistem Deteksi Slang</strong>
+                                        <span>
+                                            Sistem akan mendeteksi kata-kata tidak baku (slang) dalam teks Anda dan memberikan saran normalisasi. 
+                                            Untuk kata yang belum dikenal, Anda bisa menambahkan kata baku secara manual.
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="detectSlangForm">
+                        {{ form.hidden_tag() }}
+                        <div class="row">
+                            <div class="col-12 mb-4">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-comment-dots"></i>
+                                        Masukkan Teks
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea 
+                                        name="text" 
+                                        id="textInput" 
+                                        class="form-control-custom-large" 
+                                        rows="5" 
+                                        placeholder="Contoh: gue lg bgt ngerjain tugas, tp gabisa selesai2 nih..."
+                                        required
+                                    ></textarea>
+                                    <div class="form-text-custom">
+                                        <i class="fas fa-lightbulb me-1"></i>
+                                        Sistem akan mendeteksi kata-kata seperti "gue", "lg", "bgt", "gabisa", dll.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn-custom-primary me-3" id="detectBtn">
+                                    <i class="fas fa-search me-2"></i> Deteksi Kata Slang
+                                </button>
+                                <button type="button" class="btn-custom-secondary" id="clearTextBtn">
+                                    <i class="fas fa-eraser me-2"></i> Bersihkan Teks
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="row justify-content-center" id="resultsSection" style="display: none;">
+        <div class="col-xl-12 col-lg-12">
+            <div class="main-card">
+                <div class="card-header-custom">
+                    <div class="text-center">
+                        <h2 class="card-title">
+                            <i class="fas fa-list me-2"></i> Hasil Deteksi
+                        </h2>
+                    </div>
+                </div>
+                <div class="card-body-custom">
+                    <!-- Corrected Text -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Teks Setelah Koreksi
+                        </label>
+                        <div class="corrected-text" id="correctedText">
+                            <!-- Hasil koreksi akan ditampilkan di sini -->
+                        </div>
+                    </div>
+
+                    <!-- Unknown Words -->
+                    <div id="unknownWordsSection" style="display: none;">
+                        <label class="form-label">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            Kata Belum Dikenali
+                        </label>
+                        <div id="unknownWordsList">
+                            <!-- Daftar kata yang tidak dikenal akan ditampilkan di sini -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dictionary Section -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-xl-12 col-lg-12">
+            <div class="main-card">
+                <div class="card-header-custom">
+                    <div class="text-center">
+                        <h2 class="card-title">
+                            <i class="fas fa-book me-2"></i> Kamus Kata Baku
+                        </h2>
+                    </div>
+                </div>
+                <div class="card-body-custom">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-search me-2"></i>
+                                    Cari Kata
+                                </label>
+                                <input type="text" id="searchDictionary" class="form-control-custom" placeholder="Cari kata slang atau baku...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-list me-2"></i>
+                                    Baris per Halaman
+                                </label>
+                                <select id="rowsPerPage" class="form-select-custom">
+                                    <option value="10">10 baris</option>
+                                    <option value="25">25 baris</option>
+                                    <option value="50">50 baris</option>
+                                    <option value="100">100 baris</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="button" class="btn-custom-secondary w-100" onclick="loadDictionaryWords()">
+                                    <i class="fas fa-sync-alt me-2"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-custom" id="dictionaryTable">
+                            <thead>
+                                <tr>
+                                    <th width="60">No</th>
+                                    <th>Kata Tidak Baku (Slang)</th>
+                                    <th>Kata Baku</th>
+                                    <th width="120">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dictionaryTableBody">
+                                <!-- Data kamus akan di-load via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div id="tableInfo" class="text-muted">Menampilkan 0 data</div>
+                        <div id="paginationControls">
+                            <!-- Pagination akan di-generate via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* CSS untuk konsistensi design */
+    .card-header-custom {
+        background-color: #4a90e2;
+        color: white;
+        padding: 25px;
+    }
+    
+    .card-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    
+    .card-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    
+    .main-card {
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .card-body-custom {
+        padding: 30px;
+    }
+    
+    /* Text box besar seperti sebelumnya */
+    .form-control-custom-large {
+        width: 100%;
+        padding: 18px 20px;
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        font-size: 16px;
+        transition: all 0.3s;
+        background-color: #ffffff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .form-control-custom-large:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        outline: none;
+        transform: translateY(-1px);
+    }
+    
+    .form-control-custom {
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        font-size: 15px;
+        background-color: #ffffff;
+        transition: all 0.3s;
+    }
+    
+    .form-control-custom:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        outline: none;
+    }
+    
+    .form-select-custom {
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        font-size: 15px;
+        background-color: #ffffff;
+        transition: all 0.3s;
+    }
+    
+    .form-select-custom:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        outline: none;
+    }
+    
+    /* Button styling */
+    .btn-custom-primary {
+        background-color: #4a90e2;
+        border: none;
+        padding: 14px 35px;
+        font-size: 16px;
+        border-radius: 8px;
+        color: white;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+    
+    .btn-custom-primary:hover {
+        background-color: #3a7bc8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .btn-custom-secondary {
+        background-color: #6b7280;
+        border: none;
+        padding: 14px 35px;
+        font-size: 16px;
+        border-radius: 8px;
+        color: white;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+    
+    .btn-custom-secondary:hover {
+        background-color: #4b5563;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    /* Info alert styling */
+    .info-alert {
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        border: 1px solid #bae6fd;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-icon {
+        color: #0ea5e9;
+        font-size: 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 10px;
+        display: block;
+        font-size: 15px;
+    }
+    
+    .form-text-custom {
+        color: #6b7280;
+        font-size: 13px;
+        margin-top: 8px;
+        font-style: italic;
+    }
+    
+    /* Table styling */
+    .table-custom {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .table-custom th {
+        background-color: #f8fafc;
+        padding: 15px;
+        font-weight: 600;
+        color: #4a5568;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .table-custom td {
+        padding: 15px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .corrected-text {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        min-height: 80px;
+        line-height: 1.6;
+        font-size: 16px;
+    }
+    
+    .unknown-word-card {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+    }
+    
+    .badge {
+        font-size: 0.85em;
+        padding: 6px 12px;
+        border-radius: 6px;
+    }
+    
+    /* Style for highlighted text */
+    .baku {
+        color: #28a745;
+        font-weight: 500;
+        background-color: #f8fff9;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+    
+    .tidak-baku {
+        color: #dc3545;
+        background-color: #fff5f5;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 500;
+        text-decoration: line-through;
+    }
+    
+    /* Pagination styling */
+    #paginationControls .btn {
+        min-width: 40px;
+        margin: 0 2px;
+    }
+    
+    @media (max-width: 768px) {
+        .card-body-custom {
+            padding: 25px;
+        }
+        
+        .card-header-custom {
+            padding: 25px 20px;
+        }
+        
+        .card-title {
+            font-size: 1.6rem;
+        }
+        
+        .btn-custom-primary,
+        .btn-custom-secondary {
+            width: 100%;
+            margin-bottom: 12px;
+            margin-right: 0 !important;
+        }
+        
+        .form-control-custom-large {
+            padding: 16px;
+            font-size: 15px;
+        }
+        
+        .table-responsive {
+            font-size: 14px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Global variables
+    let allWords = [];
+    let currentPage = 1;
+    let rowsPerPage = 10;
+
+    // Get CSRF token from meta tag or form
+    function getCSRFToken() {
+        const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || 
+                         document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        return csrfToken;
+    }
+
+    $(document).ready(function() {
+        console.log('🚀 Slang Detector System Initialized');
+        console.log('CSRF Token:', getCSRFToken());
+        
+        // Load initial data
+        loadDictionaryWords();
+
+        // Form submission for detection
+        $('#detectSlangForm').on('submit', function(e) {
+            e.preventDefault();
+            detectSlangWords();
+        });
+
+        // Clear text button
+        $('#clearTextBtn').on('click', function() {
+            $('#textInput').val('');
+            $('#resultsSection').hide();
+            showTemporaryAlert('success', 'Teks dibersihkan!', 'Silakan masukkan teks baru untuk dideteksi.');
+        });
+
+        // Search functionality
+        $('#searchDictionary').on('input', function() {
+            currentPage = 1;
+            renderDictionaryTable();
+        });
+
+        // Rows per page change
+        $('#rowsPerPage').on('change', function() {
+            rowsPerPage = parseInt($(this).val());
+            currentPage = 1;
+            renderDictionaryTable();
+        });
+    });
+
+    // Utility functions
+    function showLoading() {
+        $('#detectBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Memproses...');
+    }
+
+    function hideLoading() {
+        $('#detectBtn').prop('disabled', false).html('<i class="fas fa-search me-2"></i>Deteksi Kata Slang');
+    }
+
+    function showTemporaryAlert(type, title, message) {
+        Swal.fire({
+            icon: type,
+            title: title,
+            text: message,
+            timer: 3000,
+            showConfirmButton: false
+        });
+    }
+
+    // Load dictionary words
+    async function loadDictionaryWords() {
+        try {
+            const response = await fetch('/slang-get-words');
+            const data = await response.json();
+            
+            if (data.success && data.words) {
+                allWords = data.words;
+                renderDictionaryTable();
+                console.log('✅ Dictionary words loaded:', allWords.length);
+            } else {
+                console.error('Failed to load dictionary words:', data);
+                showTemporaryAlert('error', 'Error!', 'Gagal memuat data kamus: ' + (data.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error loading dictionary words:', error);
+            showTemporaryAlert('error', 'Error!', 'Gagal memuat data kamus: ' + error.message);
+        }
+    }
+
+    // Render dictionary table with pagination
+    function renderDictionaryTable() {
+        const searchTerm = $('#searchDictionary').val().toLowerCase();
+        const filteredWords = allWords.filter(word => 
+            word.slang.toLowerCase().includes(searchTerm) || 
+            word.baku.toLowerCase().includes(searchTerm)
+        );
+
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+        const paginatedWords = filteredWords.slice(startIndex, endIndex);
+
+        // Update table body
+        const tbody = $('#dictionaryTableBody');
+        tbody.empty();
+
+        if (paginatedWords.length === 0) {
+            tbody.append(`
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-4">
+                        <i class="fas fa-search me-2"></i>Tidak ada data yang ditemukan
+                    </td>
+                </tr>
+            `);
+        } else {
+            paginatedWords.forEach((word, index) => {
+                const actualIndex = startIndex + index + 1;
+                tbody.append(`
+                    <tr>
+                        <td class="text-center">${actualIndex}</td>
+                        <td>
+                            <span class="badge bg-warning text-dark">${escapeHtml(word.slang)}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-success">${escapeHtml(word.baku)}</span>
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteWord('${escapeHtml(word.slang)}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+
+        // Update pagination info
+        const totalPages = Math.ceil(filteredWords.length / rowsPerPage);
+        $('#tableInfo').text(`Menampilkan ${startIndex + 1}-${Math.min(endIndex, filteredWords.length)} dari ${filteredWords.length} data`);
+
+        // Update pagination controls
+        updatePaginationControls(totalPages);
+    }
+
+    // Update pagination controls
+    function updatePaginationControls(totalPages) {
+        const paginationContainer = $('#paginationControls');
+        paginationContainer.empty();
+
+        if (totalPages <= 1) return;
+
+        // Previous button
+        const prevDisabled = currentPage === 1 ? 'disabled' : '';
+        paginationContainer.append(`
+            <button class="btn btn-sm btn-outline-primary me-1" ${prevDisabled} onclick="changePage(${currentPage - 1})">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        `);
+
+        // Calculate page range to show (max 7 pages)
+        let startPage = Math.max(1, currentPage - 3);
+        let endPage = Math.min(totalPages, startPage + 6);
+        
+        // Adjust start page if we're near the end
+        if (endPage - startPage < 6) {
+            startPage = Math.max(1, endPage - 6);
+        }
+
+        // Page numbers
+        for (let i = startPage; i <= endPage; i++) {
+            const active = i === currentPage ? 'active' : '';
+            paginationContainer.append(`
+                <button class="btn btn-sm ${active ? 'btn-primary' : 'btn-outline-primary'} me-1" onclick="changePage(${i})">
+                    ${i}
+                </button>
+            `);
+        }
+
+        // Next button
+        const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+        paginationContainer.append(`
+            <button class="btn btn-sm btn-outline-primary" ${nextDisabled} onclick="changePage(${currentPage + 1})">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        `);
+    }
+
+    // Change page function
+    function changePage(page) {
+        currentPage = page;
+        renderDictionaryTable();
+    }
+
+    // Detect slang words - FIXED BUG: Improved error handling and response processing
+    async function detectSlangWords() {
+        const text = $('#textInput').val().trim();
+        
+        if (!text) {
+            showTemporaryAlert('warning', 'Peringatan!', 'Masukkan teks terlebih dahulu.');
+            return;
+        }
+
+        try {
+            showLoading();
+
+            const formData = new FormData();
+            formData.append('text', text);
+            formData.append('csrf_token', getCSRFToken());
+
+            const response = await fetch('/slang-detect', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            });
+
+            // Check if response is OK
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Non-JSON response:', text.substring(0, 200));
+                throw new Error('Server returned non-JSON response');
+            }
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || 'Gagal melakukan deteksi');
+            }
+
+            // Display corrected text
+            $('#correctedText').html(data.highlighted || '<em class="text-muted">Tidak ada koreksi yang diperlukan - teks sudah baku</em>');
+
+            // Display unknown words
+            const unknownWordsList = $('#unknownWordsList');
+            unknownWordsList.empty();
+
+            if (data.unknown_words && data.unknown_words.length > 0) {
+                $('#unknownWordsSection').show();
+                data.unknown_words.forEach(word => {
+                    const safeWord = escapeHtml(word);
+                    unknownWordsList.append(`
+                        <div class="unknown-word-card" id="word-card-${safeWord}">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <strong class="text-warning">${safeWord}</strong>
+                                <div>
+                                    <button class="btn btn-sm btn-success me-1" onclick="saveNewWord('${safeWord}')">
+                                        <i class="fas fa-save me-1"></i>Simpan
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="ignoreWord('${safeWord}')">
+                                        <i class="fas fa-times me-1"></i>Lewati
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <input type="text" id="input-${safeWord}" class="form-control-custom" 
+                                           placeholder="Masukkan kata baku untuk '${safeWord}'">
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="form-text-custom">Tekan Enter untuk menyimpan cepat</small>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+
+                    // Add enter key support for quick save
+                    $(`#input-${safeWord}`).on('keypress', function(e) {
+                        if (e.which === 13) { // Enter key
+                            saveNewWord(safeWord);
+                        }
+                    });
+                });
+            } else {
+                $('#unknownWordsSection').hide();
+            }
+
+            // Show results section
+            $('#resultsSection').show();
+            
+            hideLoading();
+            showTemporaryAlert('success', 'Berhasil!', 'Deteksi selesai.');
+
+        } catch (error) {
+            console.error('Error detecting slang words:', error);
+            hideLoading();
+            showTemporaryAlert('error', 'Error!', 'Gagal melakukan deteksi: ' + error.message);
+        }
+    }
+
+    // Save new word to dictionary - FIXED BUG: Improved error handling and manual refresh
+    async function saveNewWord(slang) {
+        const baku = $(`#input-${slang}`).val().trim();
+        
+        if (!baku) {
+            showTemporaryAlert('warning', 'Peringatan!', 'Masukkan kata baku terlebih dahulu.');
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('slang', slang);
+            formData.append('baku', baku);
+            formData.append('csrf_token', getCSRFToken());
+
+            const response = await fetch('/slang-add-word', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.msg || data.error || 'Gagal menyimpan kata');
+            }
+
+            showTemporaryAlert('success', 'Berhasil!', data.msg || 'Kata berhasil disimpan.');
+            
+            // Remove the word from unknown words list
+            $(`#word-card-${slang}`).remove();
+            
+            // Check if there are any unknown words left
+            if ($('#unknownWordsList').children().length === 0) {
+                $('#unknownWordsSection').hide();
+            }
+            
+            // MANUAL RELOAD - Fix untuk bug browser tertentu
+            setTimeout(() => {
+                loadDictionaryWords();
+            }, 500);
+
+        } catch (error) {
+            console.error('Error saving new word:', error);
+            showTemporaryAlert('error', 'Error!', 'Gagal menyimpan kata: ' + error.message);
+        }
+    }
+
+    // Ignore word (mark as already formal) - FIXED BUG: Improved error handling
+    async function ignoreWord(word) {
+        try {
+            const formData = new FormData();
+            formData.append('word', word);
+            formData.append('csrf_token', getCSRFToken());
+
+            const response = await fetch('/slang-ignore-word', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.msg || data.error || 'Gagal menandai kata');
+            }
+
+            showTemporaryAlert('info', 'Dilewati!', data.msg || 'Kata dilewati.');
+            
+            // Remove the word from unknown words list
+            $(`#word-card-${word}`).remove();
+            
+            // Check if there are any unknown words left
+            if ($('#unknownWordsList').children().length === 0) {
+                $('#unknownWordsSection').hide();
+            }
+
+        } catch (error) {
+            console.error('Error ignoring word:', error);
+            showTemporaryAlert('error', 'Error!', 'Gagal menandai kata: ' + error.message);
+        }
+    }
+
+    // Delete word from dictionary
+    function deleteWord(slang) {
+        Swal.fire({
+            title: 'Hapus Kata?',
+            text: `Anda yakin ingin menghapus kata "${slang}" dari kamus?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // For now, just show message since we don't have delete endpoint
+                showTemporaryAlert('info', 'Fitur Menyusul', 'Fitur penghapusan kata akan segera tersedia.');
+            }
+        });
+    }
+
+    // Utility function to escape HTML
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+</script>
+{% endblock %}

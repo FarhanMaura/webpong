@@ -1,7 +1,7 @@
 keyword,category,intensity,target
 kontol,abusive,strong,individual
 memek,abusive,strong,individual
-jancok,abusive,strong,individual
+jancok,abusive,moderate,individual
 bangsat,abusive,strong,individual
 anjing,abusive,moderate,individual
 asu,abusive,moderate,individual
@@ -37,3 +37,4 @@ bngst,abusive,strong,individual
 asw,abusive,moderate,individual
 gblk,abusive,weak,individual
 gblok,abusive,weak,individual
+jancok koe,abusive,moderate,individual
